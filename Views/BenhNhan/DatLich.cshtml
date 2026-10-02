@@ -1,0 +1,61 @@
+@model QuanLyPhongKham.Models.ViewModels.DatLichViewModel
+
+@{
+    ViewData["Title"] = "Đặt lịch khám bệnh";
+}
+
+<div class="container mt-4">
+    <h2>Đặt lịch khám bệnh</h2>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="DatLich" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="MaBacSi" class="control-label">Chọn Bác sĩ</label>
+                    <select asp-for="MaBacSi" class="form-control" asp-items="@(new SelectList(ViewBag.DanhSachBacSi, "MaBacSi", "HoTen"))">
+                        <option value="">-- Chọn bác sĩ --</option>
+                    </select>
+                    <span asp-validation-for="MaBacSi" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="MaPhong" class="control-label">Chọn Phòng khám</label>
+                    <select asp-for="MaPhong" class="form-control" asp-items="@(new SelectList(ViewBag.DanhSachPhong, "MaPhong", "TenPhong"))">
+                        <option value="">-- Chọn phòng khám --</option>
+                    </select>
+                    <span asp-validation-for="MaPhong" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="NgayKham" class="control-label">Ngày khám</label>
+                    <input asp-for="NgayKham" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="NgayKham" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="GioKham" class="control-label">Giờ khám</label>
+                    <input asp-for="GioKham" class="form-control" type="time" />
+                    <span asp-validation-for="GioKham" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="LyDoKham" class="control-label">Lý do khám bệnh</label>
+                    <textarea asp-for="LyDoKham" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="LyDoKham" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Gửi yêu cầu đặt lịch</button>
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại lịch sử</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
