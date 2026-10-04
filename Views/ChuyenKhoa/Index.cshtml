@@ -1,0 +1,80 @@
+@model IEnumerable<QuanLyPhongKham.Models.ChuyenKhoa>
+
+@{
+    ViewData["Title"] = "Quản lý Chuyên khoa";
+    var prevDisabled = (int)ViewData["PageIndex"]! == 1 ? "disabled" : "";
+    var nextDisabled = (int)ViewData["PageIndex"]! == (int)ViewData["TotalPages"]! ? "disabled" : "";
+}
+
+<h2>Danh sách Chuyên khoa</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm mới</a>
+</p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <input type="hidden" name="sortOrder" value="@ViewData["CurrentSort"]" />
+    <div class="input-group">
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Tìm kiếm chuyên khoa..." />
+        <button class="btn btn-outline-secondary" type="submit">Tìm kiếm</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa tìm kiếm</a>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Mã CK</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]">
+                    Tên chuyên khoa
+                </a>
+            </th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@item.MaChuyenKhoa</td>
+            <td>@item.TenChuyenKhoa</td>
+            <td>@(item.TrangThai == 1 ? "Hoạt động" : "Ngừng hoạt động")</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaChuyenKhoa" class="btn btn-sm btn-warning">Sửa</a> |
+                <a asp-action="Details" asp-route-id="@item.MaChuyenKhoa" class="btn btn-sm btn-info">Chi tiết</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaChuyenKhoa" class="btn btn-sm btn-danger">Xóa</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@((int)ViewData["PageIndex"]! - 1)"
+       asp-route-searchString="@ViewData["CurrentFilter"]"
+       class="btn btn-outline-primary @prevDisabled">
+        Trước
+    </a>
+    
+    <span>Trang @ViewData["PageIndex"] / @Math.Max((int)ViewData["TotalPages"]!, 1)</span>
+    
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@((int)ViewData["PageIndex"]! + 1)"
+       asp-route-searchString="@ViewData["CurrentFilter"]"
+       class="btn btn-outline-primary @nextDisabled">
+        Tiếp
+    </a>
+</div>

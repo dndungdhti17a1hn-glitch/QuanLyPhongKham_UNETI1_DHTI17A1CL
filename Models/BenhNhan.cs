@@ -55,6 +55,6 @@ namespace QuanLyPhongKham.Models
         [Display(Name = "Trạng thái")]
         public int TrangThai { get; set; } // 1: Hoạt động, 0: Khóa
 
-        public virtual ICollection<LichHen> LichHens { get; set; }
+        public virtual ICollection<LichHen> LichHens { get; set; } = new List<LichHen>();
     }
 }

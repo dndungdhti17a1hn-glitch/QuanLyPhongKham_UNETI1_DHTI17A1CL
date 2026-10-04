@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+@using QuanLyPhongKham.Services
+@using QuanLyPhongKham.Constants
+@inject ICurrentUser CurrentUser
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -26,6 +30,35 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Admin)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="ChuyenKhoa" asp-action="Index">Quản lý Chuyên khoa</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="DichVuKham" asp-action="Index">Quản lý Dịch vụ</a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        @if (CurrentUser.IsAuthenticated)
+                        {
+                            <li class="nav-item d-flex align-items-center">
+                                <span class="nav-link text-primary">Xin chào, @CurrentUser.HoTen (@CurrentUser.VaiTro)</span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="form-inline">
+                                    <button type="submit" class="btn btn-link nav-link text-dark">Đăng xuất</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

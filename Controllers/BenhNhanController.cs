@@ -11,24 +11,31 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
+using QuanLyPhongKham.Constants;
+using QuanLyPhongKham.Filters;
+using QuanLyPhongKham.Services;
+
 namespace QuanLyPhongKham.Controllers
 {
+    [PatientOnly]
     public class BenhNhanController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public BenhNhanController(ApplicationDbContext context)
+        private readonly ICurrentUser _currentUser;
+
+        public BenhNhanController(ApplicationDbContext context, ICurrentUser currentUser)
         {
             _context = context;
+            _currentUser = currentUser;
         }
 
-        // Ràng buộc 7.6: Tra cứu cá nhân theo Session
-        private string GetMaBenhNhanFromSession()
+        // Tra cứu cá nhân theo ICurrentUser
+        private string? GetMaBenhNhanFromSession()
         {
-            var vaiTro = HttpContext.Session.GetString("VaiTro");
-            var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+            var maTaiKhoan = _currentUser.MaTaiKhoan;
 
-            if (string.IsNullOrEmpty(maTaiKhoan) || vaiTro != "Bệnh nhân")
+            if (string.IsNullOrEmpty(maTaiKhoan))
             {
                 return null;
             }
@@ -40,7 +47,7 @@ namespace QuanLyPhongKham.Controllers
         // 7.4 & 7.6: XEM LỊCH SỬ (Lịch sắp tới, lịch hoàn tất, lịch sử cá nhân)
         public async Task<IActionResult> Index()
         {
-            string maBenhNhan = GetMaBenhNhanFromSession();
+            string? maBenhNhan = GetMaBenhNhanFromSession();
             if (string.IsNullOrEmpty(maBenhNhan))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
@@ -61,7 +68,7 @@ namespace QuanLyPhongKham.Controllers
         [HttpGet]
         public IActionResult DatLich()
         {
-            string maBenhNhan = GetMaBenhNhanFromSession();
+            string? maBenhNhan = GetMaBenhNhanFromSession();
             if (string.IsNullOrEmpty(maBenhNhan))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
@@ -78,7 +85,7 @@ namespace QuanLyPhongKham.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DatLich(DatLichViewModel model)
         {
-            string maBenhNhan = GetMaBenhNhanFromSession();
+            string? maBenhNhan = GetMaBenhNhanFromSession();
             if (string.IsNullOrEmpty(maBenhNhan))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
@@ -159,7 +166,7 @@ namespace QuanLyPhongKham.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HuyLich(string id)
         {
-            string maBenhNhan = GetMaBenhNhanFromSession();
+            string? maBenhNhan = GetMaBenhNhanFromSession();
             if (string.IsNullOrEmpty(maBenhNhan)) return RedirectToAction("DangNhap", "TaiKhoan");
 
             var lichHen = await _context.LichHens.FirstOrDefaultAsync(l => l.MaLichHen == id && l.MaBenhNhan == maBenhNhan);
