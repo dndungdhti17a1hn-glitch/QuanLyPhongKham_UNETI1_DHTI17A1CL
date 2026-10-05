@@ -39,6 +39,15 @@
                                 <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="DichVuKham" asp-action="Index">Quản lý Dịch vụ</a>
                             </li>
                         }
+                        @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="BenhNhan" asp-action="DatLich">📅 Đặt lịch khám</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="BenhNhan" asp-action="Index">📋 Lịch sử khám</a>
+                            </li>
+                        }
                     </ul>
                     
                     <ul class="navbar-nav">
