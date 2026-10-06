@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyPhongKham.Constants;
+using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.ViewModels;
 using QuanLyPhongKham.Services;
 
@@ -25,6 +26,44 @@ namespace QuanLyPhongKham.Controllers
                 return RedirectToAction("Index", "Home");
             }
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult DangKy()
+        {
+            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("MaTaiKhoan")))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DangKy(DangKyViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var account = new TaiKhoan
+            {
+                TenDangNhap = model.TenDangNhap,
+                HoTen = model.HoTen,
+                Email = model.Email
+            };
+
+            var result = await _authService.RegisterAsync(account, model.MatKhau);
+
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Đăng ký tài khoản thành công. Vui lòng đăng nhập.";
+            return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
         [HttpPost]

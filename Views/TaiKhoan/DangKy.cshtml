@@ -1,0 +1,61 @@
+@model QuanLyPhongKham.Models.ViewModels.DangKyViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+        {
+            <div class="alert alert-danger">
+                @ViewData.ModelState[string.Empty]?.Errors[0].ErrorMessage
+            </div>
+        }
+
+        <form asp-action="DangKy" method="post">
+            <div class="form-group mb-3">
+                <label asp-for="TenDangNhap" class="control-label"></label>
+                <input asp-for="TenDangNhap" class="form-control" />
+                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="HoTen" class="control-label"></label>
+                <input asp-for="HoTen" class="form-control" />
+                <span asp-validation-for="HoTen" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MatKhau" class="control-label"></label>
+                <input asp-for="MatKhau" class="form-control" />
+                <span asp-validation-for="MatKhau" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="XacNhanMatKhau" class="control-label"></label>
+                <input asp-for="XacNhanMatKhau" class="form-control" />
+                <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+            </div>
+
+            <div class="form-group d-grid mb-3">
+                <button type="submit" class="btn btn-primary btn-block">Đăng ký</button>
+            </div>
+            
+            <div class="text-center">
+                <a asp-action="DangNhap" asp-controller="TaiKhoan">Đã có tài khoản? Đăng nhập</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

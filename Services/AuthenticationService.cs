@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Constants;
+using System;
 
 namespace QuanLyPhongKham.Services
 {
@@ -39,6 +41,43 @@ namespace QuanLyPhongKham.Services
             }
 
             return AuthenticationResult.Successful(account);
+        }
+
+        public async Task<RegistrationResult> RegisterAsync(TaiKhoan account, string matKhau)
+        {
+            if (account == null) throw new ArgumentNullException(nameof(account));
+            
+            account.TenDangNhap = account.TenDangNhap?.Trim() ?? string.Empty;
+            account.HoTen = account.HoTen?.Trim() ?? string.Empty;
+            account.Email = account.Email?.Trim() ?? string.Empty;
+
+            var existing = await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap == account.TenDangNhap);
+            if (existing)
+            {
+                return RegistrationResult.Failed("Tên đăng nhập đã tồn tại.");
+            }
+
+            if (string.IsNullOrEmpty(account.MaTaiKhoan))
+            {
+                account.MaTaiKhoan = Guid.NewGuid().ToString();
+            }
+            
+            // Luôn gán role và status theo yêu cầu
+            account.VaiTro = AppRoles.Patient;
+            account.TrangThai = 1;
+            
+            account.MatKhau = _passwordHasher.HashPassword(account, matKhau);
+            
+            _context.TaiKhoans.Add(account);
+            try
+            {
+                await _context.SaveChangesAsync();
+                return RegistrationResult.Successful();
+            }
+            catch (DbUpdateException)
+            {
+                return RegistrationResult.Failed("Tên đăng nhập đã tồn tại hoặc có lỗi xảy ra trong quá trình lưu.");
+            }
         }
 
         public string HashPassword(TaiKhoan account, string password)
