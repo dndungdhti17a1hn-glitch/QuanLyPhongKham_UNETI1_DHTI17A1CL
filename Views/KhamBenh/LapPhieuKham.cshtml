@@ -1,0 +1,227 @@
+@model QuanLyPhongKham.Models.ViewModels.LapPhieuKhamViewModel
+
+@{
+    ViewData["Title"] = "Lập phiếu khám bệnh";
+}
+
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý Khám</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Lập phiếu khám (@Model.MaLichHen)</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="text-primary fw-bold mb-1">📋 Lập Phiếu Khám Bệnh</h2>
+            <p class="text-muted mb-0">Nghiệp vụ 8.1 & 8.2: Bác sĩ nhập chẩn đoán, kết luận và chỉ định các dịch vụ y tế thực tế.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">⬅ Quay lại danh sách</a>
+    </div>
+
+    <!-- Thông tin bệnh nhân và lịch hẹn tóm tắt -->
+    <div class="card shadow-sm border-primary border-opacity-25 mb-4">
+        <div class="card-header bg-primary bg-opacity-10 py-3">
+            <h5 class="mb-0 text-primary fw-bold">🧑‍⚕️ Thông tin tiếp nhận bệnh nhân</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="text-muted small">Họ và tên bệnh nhân:</div>
+                    <div class="fw-bold fs-5 text-dark">@Model.TenBenhNhan</div>
+                    <div class="text-muted small">Mã BN: @Model.MaBenhNhan</div>
+                </div>
+                <div class="col-md-2">
+                    <div class="text-muted small">Giới tính:</div>
+                    <div class="fw-bold">@Model.GioiTinh</div>
+                    <div class="text-muted small">Ngày sinh: @(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "---")</div>
+                </div>
+                <div class="col-md-2">
+                    <div class="text-muted small">Số điện thoại:</div>
+                    <div class="fw-bold text-success">📞 @Model.SoDienThoai</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Bác sĩ phụ trách:</div>
+                    <div class="fw-bold">@Model.TenBacSi</div>
+                    <div class="text-muted small">Phòng khám: @Model.TenPhong</div>
+                </div>
+                <div class="col-md-2">
+                    <div class="text-muted small">Lịch hẹn lúc:</div>
+                    <div class="fw-bold">@Model.NgayHen.ToString("dd/MM/yyyy")</div>
+                    <div class="text-muted small">@Model.GioHen.ToString(@"hh\:mm")</div>
+                </div>
+                <div class="col-12 mt-2 pt-2 border-top">
+                    <span class="text-muted small">Lý do đến khám:</span>
+                    <span class="fw-semibold text-danger">@Model.LyDoKham</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form lập phiếu khám -->
+    <form asp-action="LapPhieuKham" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="MaLichHen" />
+        <input type="hidden" asp-for="MaBenhNhan" />
+        <input type="hidden" asp-for="TenBenhNhan" />
+        <input type="hidden" asp-for="SoDienThoai" />
+        <input type="hidden" asp-for="TenBacSi" />
+        <input type="hidden" asp-for="TenPhong" />
+        <input type="hidden" asp-for="NgayHen" />
+        <input type="hidden" asp-for="GioHen" />
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+        <div class="row g-4">
+            <!-- Cột trái: Kết quả khám và Chẩn đoán -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0 fw-bold text-dark">🩺 Kết quả chẩn đoán y khoa</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="NgayKham" class="form-label fw-bold">Ngày khám thực tế <span class="text-danger">*</span></label>
+                            <input asp-for="NgayKham" class="form-control" type="date" />
+                            <span asp-validation-for="NgayKham" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ChanDoan" class="form-label fw-bold">Chẩn đoán bệnh <span class="text-danger">*</span></label>
+                            <textarea asp-for="ChanDoan" class="form-control" rows="4" placeholder="Ghi rõ tình trạng bệnh, triệu chứng lâm sàng và chẩn đoán..."></textarea>
+                            <span asp-validation-for="ChanDoan" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="KetLuan" class="form-label fw-bold">Kết luận & Hướng điều trị <span class="text-danger">*</span></label>
+                            <textarea asp-for="KetLuan" class="form-control" rows="4" placeholder="Phương án điều trị, chỉ định toa thuốc, lời dặn hoặc hẹn ngày tái khám..."></textarea>
+                            <span asp-validation-for="KetLuan" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="GhiChu" class="form-label fw-bold">Ghi chú bổ sung</label>
+                            <textarea asp-for="GhiChu" class="form-control" rows="2" placeholder="Ghi chú nội bộ hoặc lưu ý đặc biệt cho bệnh nhân..."></textarea>
+                            <span asp-validation-for="GhiChu" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Chỉ định dịch vụ y tế thực tế (8.3) -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold text-dark">💉 Chỉ định Dịch vụ kỹ thuật thực tế</h5>
+                        <small class="text-muted">(Tính từ dịch vụ thực tế)</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px;" class="text-center">Chọn</th>
+                                        <th>Tên dịch vụ</th>
+                                        <th class="text-end" style="width: 120px;">Đơn giá</th>
+                                        <th class="text-center" style="width: 90px;">SL</th>
+                                        <th class="text-end pe-3" style="width: 130px;">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.DanhSachDichVu.Count; i++)
+                                    {
+                                        <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" asp-for="DanhSachDichVu[i].IsSelected" class="form-check-input dv-checkbox" data-index="@i" />
+                                                <input type="hidden" asp-for="DanhSachDichVu[i].MaDichVu" />
+                                                <input type="hidden" asp-for="DanhSachDichVu[i].TenDichVu" />
+                                                <input type="hidden" asp-for="DanhSachDichVu[i].GiaTien" class="dv-price" data-index="@i" />
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">@Model.DanhSachDichVu[i].TenDichVu</div>
+                                                <small class="text-muted">Mã: @Model.DanhSachDichVu[i].MaDichVu</small>
+                                            </td>
+                                            <td class="text-end fw-semibold">
+                                                @Model.DanhSachDichVu[i].GiaTien.ToString("N0") đ
+                                            </td>
+                                            <td>
+                                                <input type="number" asp-for="DanhSachDichVu[i].SoLuong" min="1" max="50" class="form-control form-control-sm text-center dv-quantity" data-index="@i" />
+                                            </td>
+                                            <td class="text-end pe-3 fw-bold text-primary dv-subtotal" data-index="@i">
+                                                0 đ
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-top p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Tổng số dịch vụ chọn:</span>
+                                <strong id="selectedServiceCount" class="text-primary ms-1">0</strong>
+                            </div>
+                            <div>
+                                <span class="fs-6 text-muted me-2">Tạm tính:</span>
+                                <span id="totalEstimatedPrice" class="fs-4 fw-bold text-danger">0 đ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nút Submit -->
+        <div class="d-flex justify-content-end gap-2 mt-4 mb-5">
+            <a asp-action="Index" class="btn btn-secondary px-4">Hủy bỏ</a>
+            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm fw-bold">
+                💾 Lưu Phiếu Khám & Chuyển Thu Ngân
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function recalculate() {
+            var checkboxes = document.querySelectorAll('.dv-checkbox');
+            var total = 0;
+            var count = 0;
+
+            checkboxes.forEach(function (cb) {
+                var index = cb.getAttribute('data-index');
+                var priceInput = document.querySelector('.dv-price[data-index="' + index + '"]');
+                var qtyInput = document.querySelector('.dv-quantity[data-index="' + index + '"]');
+                var subtotalSpan = document.querySelector('.dv-subtotal[data-index="' + index + '"]');
+
+                var price = parseFloat(priceInput.value) || 0;
+                var qty = parseInt(qtyInput.value) || 1;
+
+                if (cb.checked) {
+                    var subtotal = price * qty;
+                    total += subtotal;
+                    count++;
+                    subtotalSpan.textContent = subtotal.toLocaleString('vi-VN') + ' đ';
+                } else {
+                    subtotalSpan.textContent = '0 đ';
+                }
+            });
+
+            document.getElementById('selectedServiceCount').textContent = count;
+            document.getElementById('totalEstimatedPrice').textContent = total.toLocaleString('vi-VN') + ' đ';
+        }
+
+        document.querySelectorAll('.dv-checkbox').forEach(function (el) {
+            el.addEventListener('change', recalculate);
+        });
+
+        document.querySelectorAll('.dv-quantity').forEach(function (el) {
+            el.addEventListener('input', recalculate);
+        });
+
+        // Tính ban đầu
+        recalculate();
+    </script>
+}

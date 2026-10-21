@@ -1,0 +1,52 @@
+@model QuanLyPhongKham.Models.ViewModels.ChuyenKhoaCreateViewModel
+
+@{
+    ViewData["Title"] = "Thêm mới chuyên khoa";
+}
+
+<h2>Thêm mới chuyên khoa</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="MaChuyenKhoa" class="control-label"></label>
+                <input asp-for="MaChuyenKhoa" class="form-control" />
+                <span asp-validation-for="MaChuyenKhoa" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="TenChuyenKhoa" class="control-label"></label>
+                <input asp-for="TenChuyenKhoa" class="form-control" />
+                <span asp-validation-for="TenChuyenKhoa" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="MoTa" class="control-label"></label>
+                <textarea asp-for="MoTa" class="form-control"></textarea>
+                <span asp-validation-for="MoTa" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="TrangThai" class="control-label"></label>
+                <select asp-for="TrangThai" class="form-control">
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Ngừng hoạt động</option>
+                </select>
+                <span asp-validation-for="TrangThai" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Tạo mới" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

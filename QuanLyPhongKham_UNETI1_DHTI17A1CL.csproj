@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="QuanLyPhongKham_UNETI1_DHTI17A1CL-main\**" />
+    <Content Remove="QuanLyPhongKham_UNETI1_DHTI17A1CL-main\**" />
+    <EmbeddedResource Remove="QuanLyPhongKham_UNETI1_DHTI17A1CL-main\**" />
+    <None Remove="QuanLyPhongKham_UNETI1_DHTI17A1CL-main\**" />
+  </ItemGroup>
+</Project>

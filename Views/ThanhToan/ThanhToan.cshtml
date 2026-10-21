@@ -1,0 +1,172 @@
+@model QuanLyPhongKham.Models.ViewModels.ThanhToanViewModel
+
+@{
+    ViewData["Title"] = "Thực hiện Thanh toán - " + Model.MaPhieuKham;
+}
+
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý Thanh toán</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Thu tiền viện phí</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="text-success fw-bold mb-1">💳 Thu Tiền Viện Phí & Dịch Vụ</h2>
+            <p class="text-muted mb-0">Nghiệp vụ 8.3: Tổng số tiền tính toán tự động dựa trên các dịch vụ y tế thực tế được chỉ định.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">⬅ Quay lại</a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <form asp-action="XacNhanThanhToan" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="MaPhieuKham" />
+        <input type="hidden" asp-for="MaLichHen" />
+        <input type="hidden" asp-for="TongTien" />
+
+        <div class="row g-4 mb-4">
+            <!-- Cột trái: Thông tin phiếu khám và bảng dịch vụ thực tế -->
+            <div class="col-lg-7">
+                <!-- Thông tin bệnh nhân & bác sĩ -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0 fw-bold text-dark">🧑‍💼 Thông tin hồ sơ khám bệnh</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <span class="text-muted small">Bệnh nhân:</span>
+                                <div class="fw-bold fs-5 text-primary">@Model.TenBenhNhan</div>
+                                <small class="text-muted">📞 @Model.SoDienThoai</small>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted small">Bác sĩ khám:</span>
+                                <div class="fw-bold fs-6">@Model.TenBacSi</div>
+                                <small class="text-muted">Ngày khám: @Model.NgayKham.ToString("dd/MM/yyyy")</small>
+                            </div>
+                            <div class="col-12 pt-2 border-top">
+                                <span class="text-muted small">Chẩn đoán:</span>
+                                <div class="fw-semibold">@Model.ChanDoan</div>
+                            </div>
+                            <div class="col-12">
+                                <span class="text-muted small">Kết luận điều trị:</span>
+                                <div class="text-muted">@Model.KetLuan</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng chi tiết dịch vụ thực tế -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold text-dark">💉 Bảng kê dịch vụ y tế thực tế (8.3)</h5>
+                        <span class="badge bg-primary">@Model.ChiTietDichVus.Count() dịch vụ</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 40px;">#</th>
+                                        <th>Dịch vụ</th>
+                                        <th class="text-end" style="width: 120px;">Đơn giá</th>
+                                        <th class="text-center" style="width: 70px;">SL</th>
+                                        <th class="text-end pe-3" style="width: 130px;">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!Model.ChiTietDichVus.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-3">Không có dịch vụ phát sinh.</td>
+                                        </tr>
+                                    }
+                                    @{ int stt = 1; }
+                                    @foreach (var ct in Model.ChiTietDichVus)
+                                    {
+                                        <tr>
+                                            <td class="text-center">@(stt++)</td>
+                                            <td>
+                                                <div class="fw-semibold">@ct.DichVuKham?.TenDichVu</div>
+                                                <small class="text-muted">Mã: @ct.MaDichVu</small>
+                                            </td>
+                                            <td class="text-end">@ct.DonGia.ToString("N0") đ</td>
+                                            <td class="text-center">@ct.SoLuong</td>
+                                            <td class="text-end pe-3 fw-bold text-primary">@ct.ThanhTien.ToString("N0") đ</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Phương thức thanh toán & Tổng tiền -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-success border-opacity-50">
+                    <div class="card-header bg-success text-white py-3">
+                        <h5 class="card-title mb-0 fw-bold">💰 Xác nhận thu tiền viện phí</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="p-3 bg-light rounded text-center mb-4">
+                            <span class="text-muted text-uppercase small fw-bold">Tổng số tiền cần thanh toán</span>
+                            <div class="display-5 fw-bold text-danger my-2">
+                                @Model.TongTien.ToString("N0") <span class="fs-4">VNĐ</span>
+                            </div>
+                            <small class="text-muted fst-italic">Tính toán tự động từ chi tiết dịch vụ thực tế</small>
+                        </div>
+
+                        <!-- Phương thức thanh toán -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Phương thức thanh toán <span class="text-danger">*</span>:</label>
+                            <div class="d-grid gap-2">
+                                <div class="form-check p-3 border rounded">
+                                    <input class="form-check-input" type="radio" asp-for="PhuongThuc" value="Tiền mặt" id="pmCash" checked>
+                                    <label class="form-check-label fw-bold" for="pmCash">
+                                        💵 Tiền mặt tại quầy
+                                    </label>
+                                </div>
+                                <div class="form-check p-3 border rounded">
+                                    <input class="form-check-input" type="radio" asp-for="PhuongThuc" value="Chuyển khoản" id="pmTransfer">
+                                    <label class="form-check-label fw-bold" for="pmTransfer">
+                                        📲 Chuyển khoản ngân hàng (QR Code)
+                                    </label>
+                                </div>
+                                <div class="form-check p-3 border rounded">
+                                    <input class="form-check-input" type="radio" asp-for="PhuongThuc" value="Thẻ tín dụng / Thẻ ATM" id="pmCard">
+                                    <label class="form-check-label fw-bold" for="pmCard">
+                                        💳 Thẻ POS / Thẻ tín dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="GhiChu" class="form-label fw-bold">Ghi chú thanh toán:</label>
+                            <textarea asp-for="GhiChu" class="form-control" rows="2" placeholder="Ví dụ: Đã thu đủ tiền, Bệnh nhân chuyển khoản qua Techcombank..."></textarea>
+                        </div>
+
+                        <div class="alert alert-info small mb-4">
+                            <i class="bi bi-shield-check"></i> <strong>Ràng buộc hệ thống (8.3 & 8.7):</strong> Mỗi phiếu khám chỉ thanh toán một lần duy nhất, không thể thanh toán lặp lại. Dữ liệu thanh toán được bảo toàn vĩnh viễn trong lịch sử giao dịch.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm py-3" onclick="return confirm('Xác nhận thu đủ số tiền @Model.TongTien.ToString("N0") VNĐ từ bệnh nhân?');">
+                                ✅ XÁC NHẬN THU TIỀN VÀ XUẤT HÓA ĐƠN
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Hủy bỏ</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

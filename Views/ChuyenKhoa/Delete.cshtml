@@ -1,0 +1,38 @@
+@model QuanLyPhongKham.Models.ChuyenKhoa
+
+@{
+    ViewData["Title"] = "Xóa chuyên khoa";
+}
+
+<h2 class="text-danger">Xóa chuyên khoa</h2>
+<h3>Bạn có chắc chắn muốn xóa chuyên khoa này không?</h3>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MaChuyenKhoa)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MaChuyenKhoa)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TenChuyenKhoa)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TenChuyenKhoa)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MoTa)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MoTa)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="MaChuyenKhoa" />
+        <input type="submit" value="Xóa" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>

@@ -1,0 +1,163 @@
+@model QuanLyPhongKham.Models.ThanhToan
+
+@{
+    ViewData["Title"] = "Hóa đơn thanh toán - " + Model.MaThanhToan;
+}
+
+<div class="container mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-action="Index">Quản lý Thanh toán</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Hóa đơn @Model.MaThanhToan</li>
+            </ol>
+        </nav>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                🖨️ In Hóa Đơn
+            </button>
+            <a asp-controller="KhamBenh" asp-action="ChiTietPhieuKham" asp-route-id="@Model.MaPhieuKham" class="btn btn-outline-primary">
+                📄 Xem Phiếu khám
+            </a>
+            <a asp-action="Index" class="btn btn-success">
+                💳 Danh sách Thanh toán
+            </a>
+        </div>
+    </div>
+
+    <!-- Hóa đơn / Biên lai in chuẩn y tế -->
+    <div class="card shadow-sm border-0 mb-5 printable-area">
+        <div class="card-body p-4 p-md-5">
+            <!-- Header phòng khám -->
+            <div class="row pb-3 mb-4 border-bottom align-items-center">
+                <div class="col-sm-7">
+                    <h4 class="text-primary fw-bold mb-1">PHÒNG KHÁM ĐA KHOA QUỐC TẾ UNETI</h4>
+                    <p class="text-muted small mb-0">Địa chỉ: 218 Lĩnh Nam, Hoàng Mai, Hà Nội</p>
+                    <p class="text-muted small mb-0">Hotline: 1900 6868 | MST: 0102030405</p>
+                </div>
+                <div class="col-sm-5 text-sm-end mt-2 mt-sm-0">
+                    <h3 class="fw-bold text-success mb-0">HÓA ĐƠN THU TIỀN</h3>
+                    <div class="text-muted">Mã giao dịch: <strong class="text-dark">@Model.MaThanhToan</strong></div>
+                    <div class="text-muted small">Thời gian: @Model.NgayThanhToan.ToString("dd/MM/yyyy HH:mm:ss")</div>
+                </div>
+            </div>
+
+            <!-- Thông tin khách hàng & Bác sĩ -->
+            <div class="row g-3 mb-4 p-3 bg-light rounded">
+                <div class="col-md-4">
+                    <span class="text-muted small">Khách hàng / Bệnh nhân:</span>
+                    <div class="fw-bold fs-5 text-dark">@Model.PhieuKham?.LichHen?.BenhNhan?.HoTen</div>
+                    <small class="text-muted">Mã BN: @Model.PhieuKham?.LichHen?.MaBenhNhan</small>
+                </div>
+                <div class="col-md-4">
+                    <span class="text-muted small">Số điện thoại:</span>
+                    <div class="fw-semibold">@Model.PhieuKham?.LichHen?.BenhNhan?.SoDienThoai</div>
+                    <small class="text-muted text-truncate d-block">Địa chỉ: @Model.PhieuKham?.LichHen?.BenhNhan?.DiaChi</small>
+                </div>
+                <div class="col-md-4">
+                    <span class="text-muted small">Bác sĩ khám / Phòng:</span>
+                    <div class="fw-semibold text-primary">@Model.PhieuKham?.LichHen?.BacSi?.HoTen</div>
+                    <small class="text-muted">Phòng: @Model.PhieuKham?.LichHen?.PhongKham?.TenPhong</small>
+                </div>
+                <div class="col-12 pt-2 border-top">
+                    <span class="text-muted small">Chẩn đoán:</span>
+                    <span class="fw-semibold">@Model.PhieuKham?.ChanDoan</span>
+                    <span class="text-muted ms-3 small">Mã phiếu khám: @Model.MaPhieuKham</span>
+                </div>
+            </div>
+
+            <!-- Bảng kê chi tiết dịch vụ thực tế -->
+            <div class="mb-4">
+                <h6 class="text-dark fw-bold mb-3">Bảng kê chi tiết dịch vụ y tế:</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;" class="text-center">STT</th>
+                                <th>Tên dịch vụ kỹ thuật</th>
+                                <th class="text-center" style="width: 100px;">Số lượng</th>
+                                <th class="text-end" style="width: 150px;">Đơn giá</th>
+                                <th class="text-end" style="width: 170px;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int stt = 1; }
+                            @if (Model.PhieuKham?.ChiTietDichVus != null)
+                            {
+                                foreach (var ct in Model.PhieuKham.ChiTietDichVus)
+                                {
+                                    <tr>
+                                        <td class="text-center">@(stt++)</td>
+                                        <td class="fw-semibold">@ct.DichVuKham?.TenDichVu</td>
+                                        <td class="text-center">@ct.SoLuong</td>
+                                        <td class="text-end">@ct.DonGia.ToString("N0") đ</td>
+                                        <td class="text-end fw-bold">@ct.ThanhTien.ToString("N0") đ</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end fs-6">TỔNG CỘNG TIỀN THANH TOÁN:</th>
+                                <th class="text-end fs-4 text-danger fw-bold">@Model.SoTien.ToString("N0") VNĐ</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Chi tiết thanh toán -->
+            <div class="p-3 bg-light rounded mb-4">
+                <div class="row align-items-center">
+                    <div class="col-sm-6">
+                        <div><strong>Hình thức thanh toán:</strong> <span class="badge bg-primary">@Model.PhuongThuc</span></div>
+                        <div class="mt-1"><strong>Trạng thái:</strong> <span class="badge bg-success">@Model.TrangThai</span></div>
+                        @if (!string.IsNullOrEmpty(Model.GhiChu))
+                        {
+                            <div class="mt-1 text-muted small"><strong>Ghi chú:</strong> @Model.GhiChu</div>
+                        }
+                    </div>
+                    <div class="col-sm-6 text-sm-end mt-2 mt-sm-0">
+                        <small class="text-muted d-block">Đã hoàn thành toàn bộ nghĩa vụ tài chính.</small>
+                        <small class="text-success fw-bold">Hóa đơn hợp lệ theo quy định lưu trữ viện phí.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chữ ký -->
+            <div class="row pt-4 text-center mt-4">
+                <div class="col-6">
+                    <p class="mb-1 fw-bold">NGƯỜI NỘP TIỀN</p>
+                    <small class="text-muted">(Ký và ghi rõ họ tên)</small>
+                </div>
+                <div class="col-6">
+                    <p class="mb-1 text-muted small">Hà Nội, ngày @Model.NgayThanhToan.ToString("dd") tháng @Model.NgayThanhToan.ToString("MM") năm @Model.NgayThanhToan.ToString("yyyy")</p>
+                    <p class="mb-1 fw-bold">THU NGÂN / KẾ TOÁN</p>
+                    <small class="text-muted">(Ký, đóng dấu thu tiền)</small>
+                    <div style="height: 60px;"></div>
+                    <div class="fw-bold text-success">ĐÃ THU ĐỦ TIỀN</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+        .printable-area, .printable-area * {
+            visibility: visible;
+        }
+        .printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .btn, nav, header, footer {
+            display: none !important;
+        }
+    }
+</style>

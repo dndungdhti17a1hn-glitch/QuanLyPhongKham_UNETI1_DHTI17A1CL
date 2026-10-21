@@ -1,0 +1,283 @@
+@model QuanLyPhongKham.Models.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Tổng Quan Phòng Khám";
+}
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary fw-bold mb-1">📊 Bảng Điều Khiển Quản Lý (Dashboard)</h2>
+            <p class="text-muted mb-0">Module 4 - Mục 8.5: Báo cáo chỉ số vận hành tổng quan phòng khám thời gian thực</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="KhamBenh" asp-action="Index" class="btn btn-primary">
+                🩺 Tiếp nhận & Khám
+            </a>
+            <a asp-controller="ThanhToan" asp-action="Index" class="btn btn-success">
+                💳 Quản lý Thu ngân
+            </a>
+            <a asp-controller="ThongKe" asp-action="Index" class="btn btn-outline-info">
+                📈 Thống kê LINQ
+            </a>
+        </div>
+    </div>
+
+    <!-- 8.5: 7 CHỈ SỐ DASHBOARD THEO ĐÚNG YÊU CẦU -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Tổng bệnh nhân -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 border-start border-primary border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">1. Tổng bệnh nhân</div>
+                            <div class="fs-2 fw-bold text-primary mt-1">@Model.TongBenhNhan</div>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary fs-3">
+                            👥
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Hồ sơ bệnh nhân đăng ký</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Tổng bác sĩ -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 border-start border-info border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">2. Tổng bác sĩ</div>
+                            <div class="fs-2 fw-bold text-info mt-1">@Model.TongBacSi</div>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 text-info fs-3">
+                            👨‍⚕️
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Bác sĩ các chuyên khoa</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Tổng phòng khám -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 border-start border-secondary border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">3. Tổng phòng khám</div>
+                            <div class="fs-2 fw-bold text-secondary mt-1">@Model.TongPhongKham</div>
+                        </div>
+                        <div class="rounded-circle bg-secondary bg-opacity-10 p-3 text-secondary fs-3">
+                            🏥
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Phòng chức năng hoạt động</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Tổng lịch hẹn -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 border-start border-dark border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">4. Tổng lịch hẹn</div>
+                            <div class="fs-2 fw-bold text-dark mt-1">@Model.TongLichHen</div>
+                        </div>
+                        <div class="rounded-circle bg-dark bg-opacity-10 p-3 text-dark fs-3">
+                            📅
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Toàn bộ lượt đăng ký</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Chờ xác nhận -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card shadow-sm border-0 border-start border-warning border-4 h-100 bg-warning bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-warning-emphasis small text-uppercase fw-bold">5. Chờ xác nhận</div>
+                            <div class="fs-2 fw-bold text-warning-emphasis mt-1">@Model.ChoXacNhan</div>
+                        </div>
+                        <div class="rounded-circle bg-warning bg-opacity-25 p-3 text-warning-emphasis fs-3">
+                            ⏳
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <a asp-controller="KhamBenh" asp-action="Index" asp-route-status="Chờ xác nhận" class="text-decoration-none small fw-bold text-warning-emphasis">
+                            Xem & duyệt lịch ngay ➔
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Lượt hoàn tất -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card shadow-sm border-0 border-start border-success border-4 h-100 bg-success bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-success small text-uppercase fw-bold">6. Lượt khám hoàn tất</div>
+                            <div class="fs-2 fw-bold text-success mt-1">@Model.LuotHoanTat</div>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 text-success fs-3">
+                            ✅
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <a asp-controller="KhamBenh" asp-action="Index" asp-route-status="Hoàn tất" class="text-decoration-none small fw-bold text-success">
+                            Xem danh sách hoàn tất ➔
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Tổng doanh thu -->
+        <div class="col-xl-4 col-md-12">
+            <div class="card shadow-sm border-0 border-start border-danger border-4 h-100 bg-danger bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-danger small text-uppercase fw-bold">7. Tổng doanh thu thực thu</div>
+                            <div class="fs-2 fw-bold text-danger mt-1">@Model.TongDoanhThu.ToString("N0") <span class="fs-5">đ</span></div>
+                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-25 p-3 text-danger fs-3">
+                            💵
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <a asp-controller="ThanhToan" asp-action="Index" asp-route-tab="DaThanhToan" class="text-decoration-none small fw-bold text-danger">
+                            Xem chi tiết các hóa đơn ➔
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hàng bảng dữ liệu chi tiết cần xử lý -->
+    <div class="row g-4 mb-4">
+        <!-- Cột trái: Lịch chờ xác nhận khẩn cấp -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="card-title mb-0 fw-bold text-warning-emphasis">
+                        ⚠️ Lịch hẹn đang chờ duyệt (@Model.ChoXacNhan)
+                    </h5>
+                    <a asp-controller="KhamBenh" asp-action="Index" asp-route-status="Chờ xác nhận" class="btn btn-sm btn-outline-warning">
+                        Tất cả
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Mã lịch</th>
+                                    <th>Bệnh nhân</th>
+                                    <th>Bác sĩ</th>
+                                    <th>Thời gian</th>
+                                    <th class="text-end pe-3">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!Model.LichHenChoXacNhan.Any())
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            <em>Hiện tại không có lịch hẹn nào chờ duyệt.</em>
+                                        </td>
+                                    </tr>
+                                }
+                                @foreach (var item in Model.LichHenChoXacNhan)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-bold text-primary">@item.MaLichHen</td>
+                                        <td>
+                                            <div class="fw-bold">@item.BenhNhan?.HoTen</div>
+                                            <small class="text-muted">@item.BenhNhan?.SoDienThoai</small>
+                                        </td>
+                                        <td>@item.BacSi?.HoTen</td>
+                                        <td>
+                                            <div>@item.NgayKham.ToString("dd/MM/yyyy")</div>
+                                            <small class="text-muted">@item.GioKham.ToString(@"hh\:mm")</small>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <form asp-controller="KhamBenh" asp-action="XacNhan" asp-route-id="@item.MaLichHen" method="post" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Giao dịch viện phí gần nhất -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="card-title mb-0 fw-bold text-success">
+                        💰 Giao dịch thanh toán gần nhất
+                    </h5>
+                    <a asp-controller="ThanhToan" asp-action="Index" class="btn btn-sm btn-outline-success">
+                        Tất cả
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Mã GD</th>
+                                    <th>Bệnh nhân</th>
+                                    <th>Phương thức</th>
+                                    <th>Thời gian</th>
+                                    <th class="text-end pe-3">Số tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!Model.ThanhToanGanDay.Any())
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            <em>Chưa có giao dịch thu tiền nào gần đây.</em>
+                                        </td>
+                                    </tr>
+                                }
+                                @foreach (var item in Model.ThanhToanGanDay)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-bold text-success">@item.MaThanhToan</td>
+                                        <td>@item.PhieuKham?.LichHen?.BenhNhan?.HoTen</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">@item.PhuongThuc</span>
+                                        </td>
+                                        <td>@item.NgayThanhToan.ToString("dd/MM HH:mm")</td>
+                                        <td class="text-end pe-3 fw-bold text-danger">
+                                            @item.SoTien.ToString("N0") đ
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

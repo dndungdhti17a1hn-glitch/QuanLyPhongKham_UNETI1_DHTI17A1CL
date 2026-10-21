@@ -1,0 +1,134 @@
+@model IEnumerable<QuanLyPhongKham.Models.LichHen>
+
+@{
+    ViewData["Title"] = "Lịch sử khám bệnh";
+}
+
+<div class="container mt-4">
+    <h2>Lịch sử khám bệnh và Lịch hẹn của bạn</h2>
+    <hr />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <p>
+        <a asp-action="DatLich" class="btn btn-primary">➕ Đặt lịch khám mới</a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Mã lịch hẹn</th>
+                <th>Ngày khám</th>
+                <th>Giờ khám</th>
+                <th>Bác sĩ</th>
+                <th>Phòng khám</th>
+                <th>Lý do khám</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+                <tr>
+                    <td>@item.MaLichHen</td>
+                    <td>@item.NgayKham.ToString("dd/MM/yyyy")</td>
+                    <td>@item.GioKham</td>
+                    <td>@item.BacSi?.HoTen</td>
+                    <td>@item.PhongKham?.TenPhong</td>
+                    <td>@item.LyDoKham</td>
+                    <td>
+                        @if (item.TrangThai == "Chờ xác nhận")
+                        {
+                            <span class="badge bg-warning text-dark">@item.TrangThai</span>
+                        }
+                        else if (item.TrangThai == "Đã xác nhận" || item.TrangThai == "Đã tiếp nhận")
+                        {
+                            <span class="badge bg-info text-dark">@item.TrangThai</span>
+                        }
+                        @if (item.TrangThai == "Hoàn tất" || item.TrangThai == "Chờ thanh toán")
+                        {
+                            <span class="badge bg-success">@item.TrangThai</span>
+                        }
+                        else if (item.TrangThai == "Chờ xác nhận")
+                        {
+                            <span class="badge bg-warning text-dark">@item.TrangThai</span>
+                        }
+                        else if (item.TrangThai == "Đã xác nhận" || item.TrangThai == "Đã tiếp nhận")
+                        {
+                            <span class="badge bg-info text-dark">@item.TrangThai</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">@item.TrangThai</span>
+                            @if (!string.IsNullOrEmpty(item.LyDoHuy))
+                            {
+                                <div><small class="text-danger fst-italic">(@item.LyDoHuy)</small></div>
+                            }
+                        }
+                    </td>
+                    <td>
+                        @if (item.PhieuKham != null)
+                        {
+                            <a asp-action="XemKetQuaKham" asp-route-id="@item.PhieuKham.MaPhieuKham" class="btn btn-sm btn-info text-white mb-1">
+                                📋 Xem kết quả
+                            </a>
+                        }
+                        @if (item.TrangThai == "Chờ xác nhận")
+                        {
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalPatientHuy" data-malich="@item.MaLichHen">
+                                ❌ Hủy lịch
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Hủy lịch bệnh nhân -->
+<div class="modal fade" id="modalPatientHuy" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="HuyLich" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="patientHuyMaLich" />
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Xác nhận hủy lịch hẹn</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn hủy lịch hẹn này?</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Lý do hủy lịch:</label>
+                        <input type="text" name="lyDoHuy" class="form-control" placeholder="Nhập lý do hủy (ví dụ: bận việc đột xuất...)" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger">Hủy lịch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var modalPatientHuy = document.getElementById('modalPatientHuy');
+        if (modalPatientHuy) {
+            modalPatientHuy.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var maLich = button.getAttribute('data-malich');
+                document.getElementById('patientHuyMaLich').value = maLich;
+            });
+        }
+    </script>
+}

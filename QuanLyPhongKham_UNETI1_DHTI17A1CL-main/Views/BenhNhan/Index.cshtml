@@ -1,0 +1,77 @@
+@model IEnumerable<QuanLyPhongKham.Models.LichHen>
+
+@{
+    ViewData["Title"] = "Lịch sử khám bệnh";
+}
+
+<div class="container mt-4">
+    <h2>Lịch sử khám bệnh và Lịch hẹn của bạn</h2>
+    <hr />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <p>
+        <a asp-action="DatLich" class="btn btn-primary">➕ Đặt lịch khám mới</a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Mã lịch hẹn</th>
+                <th>Ngày khám</th>
+                <th>Giờ khám</th>
+                <th>Bác sĩ</th>
+                <th>Phòng khám</th>
+                <th>Lý do khám</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+                <tr>
+                    <td>@item.MaLichHen</td>
+                    <td>@item.NgayKham.ToString("dd/MM/yyyy")</td>
+                    <td>@item.GioKham</td>
+                    <td>@item.BacSi?.HoTen</td>
+                    <td>@item.PhongKham?.TenPhong</td>
+                    <td>@item.LyDoKham</td>
+                    <td>
+                        @if (item.TrangThai == "Chờ xác nhận")
+                        {
+                            <span class="badge bg-warning text-dark">@item.TrangThai</span>
+                        }
+                        else if (item.TrangThai == "Đã xác nhận" || item.TrangThai == "Đã tiếp nhận")
+                        {
+                            <span class="badge bg-info text-dark">@item.TrangThai</span>
+                        }
+                        else if (item.TrangThai == "Hoàn tất")
+                        {
+                            <span class="badge bg-success">@item.TrangThai</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">@item.TrangThai</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.TrangThai == "Chờ xác nhận")
+                        {
+                            <form asp-action="HuyLich" asp-route-id="@item.MaLichHen" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">Hủy lịch</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

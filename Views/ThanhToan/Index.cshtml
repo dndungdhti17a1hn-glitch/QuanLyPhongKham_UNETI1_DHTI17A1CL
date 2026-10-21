@@ -1,0 +1,204 @@
+@{
+    ViewData["Title"] = "Quản lý Thanh toán viện phí";
+    string currentTab = ViewBag.CurrentTab as string ?? "ChoThanhToan";
+    var danhSachChoThanhToan = ViewBag.DanhSachChoThanhToan as List<QuanLyPhongKham.Models.PhieuKham> ?? new List<QuanLyPhongKham.Models.PhieuKham>();
+    var danhSachDaThanhToan = ViewBag.DanhSachDaThanhToan as List<QuanLyPhongKham.Models.ThanhToan> ?? new List<QuanLyPhongKham.Models.ThanhToan>();
+}
+
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="text-success fw-bold mb-1">💳 Quản lý Thanh toán & Hóa đơn</h2>
+            <p class="text-muted mb-0">Module 4 - Nghiệp vụ 8.3: Tính từ dịch vụ thực tế, Chặn thanh toán 2 lần, Lưu vết lịch sử</p>
+        </div>
+        <div>
+            <a asp-controller="KhamBenh" asp-action="Index" class="btn btn-outline-primary me-2">
+                🩺 Quản lý Khám bệnh
+            </a>
+            <a asp-controller="ThongKe" asp-action="Index" class="btn btn-outline-success">
+                📊 Báo cáo Doanh thu
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông báo -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Thành công!</strong> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Lỗi!</strong> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <strong>Thông báo:</strong> @TempData["InfoMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thanh tìm kiếm -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <input type="hidden" name="tab" value="@currentTab" />
+                <div class="col-md-9">
+                    <input type="text" name="searchString" value="@ViewBag.SearchString" class="form-control" placeholder="Tìm theo Mã phiếu khám, Mã giao dịch, Tên bệnh nhân, SĐT..." />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-success flex-grow-1">🔍 Tìm kiếm</button>
+                    <a asp-action="Index" asp-route-tab="@currentTab" class="btn btn-outline-secondary">Đặt lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabs phân loại -->
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link fw-bold @(currentTab == "ChoThanhToan" ? "active text-danger border-danger border-bottom-0" : "text-muted")" asp-action="Index" asp-route-tab="ChoThanhToan" asp-route-searchString="@ViewBag.SearchString">
+                ⏳ Chờ thanh toán <span class="badge bg-danger ms-1">@ViewBag.CountChoThanhToan</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold @(currentTab == "DaThanhToan" ? "active text-success border-success border-bottom-0" : "text-muted")" asp-action="Index" asp-route-tab="DaThanhToan" asp-route-searchString="@ViewBag.SearchString">
+                ✅ Đã thanh toán thành công <span class="badge bg-success ms-1">@ViewBag.CountDaThanhToan</span>
+            </a>
+        </li>
+    </ul>
+
+    @if (currentTab == "ChoThanhToan")
+    {
+        <!-- Bảng danh sách chờ thanh toán -->
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Mã phiếu khám</th>
+                                <th>Bệnh nhân</th>
+                                <th>Bác sĩ chỉ định</th>
+                                <th>Ngày khám</th>
+                                <th>Chẩn đoán</th>
+                                <th>Dịch vụ thực tế</th>
+                                <th class="text-end">Tổng tiền viện phí</th>
+                                <th class="text-center pe-3">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!danhSachChoThanhToan.Any())
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <em>Không có phiếu khám nào đang chờ thanh toán.</em>
+                                    </td>
+                                </tr>
+                            }
+                            @foreach (var pk in danhSachChoThanhToan)
+                            {
+                                decimal tongTien = pk.ChiTietDichVus.Sum(c => c.ThanhTien);
+                                <tr>
+                                    <td class="ps-3 fw-bold text-primary">@pk.MaPhieuKham</td>
+                                    <td>
+                                        <div class="fw-bold">@pk.LichHen?.BenhNhan?.HoTen</div>
+                                        <small class="text-muted">📞 @pk.LichHen?.BenhNhan?.SoDienThoai</small>
+                                    </td>
+                                    <td>@pk.LichHen?.BacSi?.HoTen</td>
+                                    <td>@pk.NgayKham.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span title="@pk.ChanDoan">
+                                            @(pk.ChanDoan != null && pk.ChanDoan.Length > 25 ? pk.ChanDoan.Substring(0, 25) + "..." : pk.ChanDoan)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">@pk.ChiTietDichVus.Count() dịch vụ</span>
+                                    </td>
+                                    <td class="text-end fw-bold text-danger fs-6">
+                                        @tongTien.ToString("N0") VNĐ
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <a asp-action="ThanhToan" asp-route-maPhieuKham="@pk.MaPhieuKham" class="btn btn-sm btn-success fw-bold px-3">
+                                            💳 Thu tiền
+                                        </a>
+                                        <a asp-controller="KhamBenh" asp-action="ChiTietPhieuKham" asp-route-id="@pk.MaPhieuKham" class="btn btn-sm btn-outline-secondary">
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Bảng danh sách đã thanh toán -->
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Mã GD / Hóa đơn</th>
+                                <th>Mã phiếu khám</th>
+                                <th>Bệnh nhân</th>
+                                <th>Bác sĩ</th>
+                                <th>Thời gian thanh toán</th>
+                                <th>Phương thức</th>
+                                <th class="text-end">Số tiền thực tế</th>
+                                <th class="text-center pe-3">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!danhSachDaThanhToan.Any())
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <em>Không có lịch sử thanh toán nào.</em>
+                                    </td>
+                                </tr>
+                            }
+                            @foreach (var tt in danhSachDaThanhToan)
+                            {
+                                <tr>
+                                    <td class="ps-3 fw-bold text-success">@tt.MaThanhToan</td>
+                                    <td>@tt.MaPhieuKham</td>
+                                    <td>
+                                        <div class="fw-bold">@tt.PhieuKham?.LichHen?.BenhNhan?.HoTen</div>
+                                        <small class="text-muted">📞 @tt.PhieuKham?.LichHen?.BenhNhan?.SoDienThoai</small>
+                                    </td>
+                                    <td>@tt.PhieuKham?.LichHen?.BacSi?.HoTen</td>
+                                    <td>@tt.NgayThanhToan.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@tt.PhuongThuc</span>
+                                    </td>
+                                    <td class="text-end fw-bold text-success fs-6">
+                                        @tt.SoTien.ToString("N0") VNĐ
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <a asp-action="HoaDon" asp-route-id="@tt.MaThanhToan" class="btn btn-sm btn-outline-success">
+                                            🧾 Xem hóa đơn
+                                        </a>
+                                        <a asp-controller="KhamBenh" asp-action="ChiTietPhieuKham" asp-route-id="@tt.MaPhieuKham" class="btn btn-sm btn-outline-primary">
+                                            Phiếu khám
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,128 @@
+@using QuanLyPhongKham.Services
+@using QuanLyPhongKham.Constants
+@inject ICurrentUser CurrentUser
+
+@{
+    ViewData["Title"] = "Hệ Thống Quản Lý Phòng Khám UNETI";
+}
+
+<div class="container py-4">
+    <!-- Hero Banner -->
+    <div class="p-5 mb-4 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25">
+        <div class="container-fluid py-2">
+            <h1 class="display-5 fw-bold text-primary">🏥 Hệ Thống Quản Lý Phòng Khám Y Tế</h1>
+            <p class="col-md-9 fs-5 text-secondary">
+                Giải pháp số hóa toàn diện quy trình y tế: Tiếp nhận bệnh nhân, Lập phiếu khám bệnh, Tính viện phí thực tế, Thống kê thông minh LINQ và Bảo toàn hồ sơ bệnh án.
+            </p>
+            @if (CurrentUser.IsAuthenticated)
+            {
+                <div class="mt-4">
+                    <span class="fs-5 me-3">Xin chào, <strong class="text-primary">@CurrentUser.HoTen</strong> (@CurrentUser.VaiTro)</span>
+                    @if (CurrentUser.VaiTro == AppRoles.Admin)
+                    {
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-primary btn-lg px-4 me-2">📊 Vào Dashboard</a>
+                        <a asp-controller="KhamBenh" asp-action="Index" class="btn btn-outline-primary btn-lg px-4">🩺 Tiếp nhận & Khám</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="BenhNhan" asp-action="Index" class="btn btn-primary btn-lg px-4 me-2">📅 Lịch sử khám</a>
+                        <a asp-controller="BenhNhan" asp-action="DatLich" class="btn btn-success btn-lg px-4">➕ Đặt lịch khám</a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="mt-4">
+                    <a asp-controller="TaiKhoan" asp-action="DangNhap" class="btn btn-primary btn-lg px-4 me-2">🔑 Đăng nhập hệ thống</a>
+                    <div class="mt-3 p-3 bg-white rounded border d-inline-block small">
+                        <strong>Tài khoản thử nghiệm:</strong><br />
+                        • Admin: <code>admin</code> / Mật khẩu: <code>Admin@123</code><br />
+                        • Bệnh nhân: <code>benhnhan1</code> / Mật khẩu: <code>123456</code>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Giới thiệu các chức năng Module 4 -->
+    <h3 class="fw-bold mb-4 text-dark border-bottom pb-2">🌟 Phân hệ Module 4 - Xử lý khám, Thanh toán và Thống kê</h3>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 border-top border-primary border-4">
+                <div class="card-body">
+                    <div class="fs-2 mb-2">📋</div>
+                    <h5 class="card-title fw-bold text-primary">8.1 & 8.2: Tiếp nhận & Khám bệnh</h5>
+                    <p class="card-text text-muted">
+                        Kiểm tra lịch xác nhận, cập nhật tiếp nhận vào phòng khám, và lập phiếu khám y tế kèm chỉ định dịch vụ kỹ thuật thực tế.
+                    </p>
+                    <a asp-controller="KhamBenh" asp-action="Index" class="btn btn-outline-primary btn-sm">Xem quy trình khám ➔</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 border-top border-success border-4">
+                <div class="card-body">
+                    <div class="fs-2 mb-2">💳</div>
+                    <h5 class="card-title fw-bold text-success">8.3: Thanh toán viện phí</h5>
+                    <p class="card-text text-muted">
+                        Tính tổng tiền chính xác từ các dịch vụ sử dụng thực tế. Cơ chế chống thanh toán 2 lần chặt chẽ và in hóa đơn y tế.
+                    </p>
+                    <a asp-controller="ThanhToan" asp-action="Index" class="btn btn-outline-success btn-sm">Quản lý thanh toán ➔</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 border-top border-warning border-4">
+                <div class="card-body">
+                    <div class="fs-2 mb-2">❌</div>
+                    <h5 class="card-title fw-bold text-warning-emphasis">8.4: Hủy lịch khám có lưu lý do</h5>
+                    <p class="card-text text-muted">
+                        Chỉ cho phép hủy lịch khi trạng thái cho phép (Chờ xác nhận / Đã xác nhận). Ghi nhận và bảo toàn lý do hủy trên hồ sơ.
+                    </p>
+                    <a asp-controller="KhamBenh" asp-action="Index" asp-route-status="Đã hủy" class="btn btn-outline-warning btn-sm">Xem lịch đã hủy ➔</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 border-top border-info border-4">
+                <div class="card-body">
+                    <div class="fs-2 mb-2">📊</div>
+                    <h5 class="card-title fw-bold text-info">8.5: Dashboard tổng quan</h5>
+                    <p class="card-text text-muted">
+                        Theo dõi thời gian thực 7 chỉ số chủ chốt: Tổng bệnh nhân, Bác sĩ, Phòng khám, Lịch hẹn, Chờ duyệt, Lượt hoàn tất và Doanh thu.
+                    </p>
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-info btn-sm">Mở Dashboard ➔</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 border-top border-danger border-4">
+                <div class="card-body">
+                    <div class="fs-2 mb-2">📈</div>
+                    <h5 class="card-title fw-bold text-danger">8.6: Báo cáo Thống kê LINQ</h5>
+                    <p class="card-text text-muted">
+                        Thực thi 6 thống kê LINQ nâng cao: Lịch theo chuyên khoa, Bác sĩ nhiều ca khám, Dịch vụ dùng nhiều, Doanh thu theo tháng, Tỷ lệ hoàn tất/hủy, Bệnh nhân theo tháng.
+                    </p>
+                    <a asp-controller="ThongKe" asp-action="Index" class="btn btn-outline-danger btn-sm">Xem biểu đồ thống kê ➔</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 border-top border-dark border-4">
+                <div class="card-body">
+                    <div class="fs-2 mb-2">🛡️</div>
+                    <h5 class="card-title fw-bold text-dark">8.7: Bảo toàn lịch sử khám</h5>
+                    <p class="card-text text-muted">
+                        Chính sách bảo toàn toàn vẹn dữ liệu y khoa (Không Delete). Công cụ tra cứu tiền sử bệnh án theo Bệnh nhân và theo Bác sĩ.
+                    </p>
+                    <a asp-controller="LichSuKham" asp-action="Index" class="btn btn-outline-dark btn-sm">Tra cứu hồ sơ ➔</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
