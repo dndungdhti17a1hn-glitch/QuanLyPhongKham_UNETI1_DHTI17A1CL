@@ -56,11 +56,6 @@ namespace QuanLyPhongKham.Controllers
             var lichHens = await _context.LichHens
                 .Include(l => l.BacSi)
                 .Include(l => l.PhongKham)
-                .Include(l => l.PhieuKham)
-                    .ThenInclude(p => p.ThanhToan)
-                .Include(l => l.PhieuKham)
-                    .ThenInclude(p => p.ChiTietDichVus)
-                        .ThenInclude(c => c.DichVuKham)
                 .Where(l => l.MaBenhNhan == maBenhNhan)
                 .OrderByDescending(l => l.NgayKham)
                 .ThenByDescending(l => l.GioKham)
@@ -166,10 +161,10 @@ namespace QuanLyPhongKham.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // 7.3 & 7.5 & 8.4: HỦY LỊCH (Chỉ được hủy khi trạng thái là "Chờ xác nhận", bảo toàn lịch sử và lưu lý do)
+        // 7.3 & 7.5: HỦY LỊCH (Chỉ được hủy khi trạng thái là "Chờ xác nhận", bảo toàn lịch sử không xóa ngang)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> HuyLich(string id, string? lyDoHuy)
+        public async Task<IActionResult> HuyLich(string id)
         {
             string? maBenhNhan = GetMaBenhNhanFromSession();
             if (string.IsNullOrEmpty(maBenhNhan)) return RedirectToAction("DangNhap", "TaiKhoan");
@@ -184,39 +179,11 @@ namespace QuanLyPhongKham.Controllers
             }
 
             lichHen.TrangThai = "Đã hủy";
-            lichHen.LyDoHuy = string.IsNullOrWhiteSpace(lyDoHuy) ? "Bệnh nhân tự hủy qua cổng thông tin cá nhân" : lyDoHuy.Trim();
             _context.Update(lichHen);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Hủy lịch hẹn thành công. Lý do đã được ghi nhận.";
+            TempData["SuccessMessage"] = "Hủy lịch hẹn thành công.";
             return RedirectToAction(nameof(Index));
-        }
-
-        // Xem kết quả khám bệnh cá nhân
-        [HttpGet]
-        public async Task<IActionResult> XemKetQuaKham(string id)
-        {
-            string? maBenhNhan = GetMaBenhNhanFromSession();
-            if (string.IsNullOrEmpty(maBenhNhan)) return RedirectToAction("DangNhap", "TaiKhoan");
-
-            var phieuKham = await _context.PhieuKhams
-                .Include(p => p.LichHen)
-                    .ThenInclude(l => l.BenhNhan)
-                .Include(p => p.LichHen)
-                    .ThenInclude(l => l.BacSi)
-                .Include(p => p.LichHen)
-                    .ThenInclude(l => l.PhongKham)
-                .Include(p => p.ChiTietDichVus)
-                    .ThenInclude(c => c.DichVuKham)
-                .Include(p => p.ThanhToan)
-                .FirstOrDefaultAsync(p => p.MaPhieuKham == id && p.LichHen.MaBenhNhan == maBenhNhan);
-
-            if (phieuKham == null)
-            {
-                return NotFound();
-            }
-
-            return View(phieuKham);
         }
     }
 }

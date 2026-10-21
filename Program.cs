@@ -34,23 +34,6 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Khởi tạo dữ liệu mẫu
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        var hasher = services.GetRequiredService<IPasswordHasher<TaiKhoan>>();
-        DbInitializer.Initialize(context, hasher);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Lỗi xảy ra trong quá trình khởi tạo dữ liệu ban đầu.");
-    }
-}
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

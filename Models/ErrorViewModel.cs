@@ -1,4 +1,4 @@
-namespace QuanLyPhongKham_UNETI1_DHTI17A1CL.Models
+namespace QuanLyPhongKham.Models
 {
     public class ErrorViewModel
     {

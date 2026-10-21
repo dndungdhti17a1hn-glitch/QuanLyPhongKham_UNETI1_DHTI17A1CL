@@ -6,6 +6,7 @@ namespace QuanLyPhongKham.Models
     public class TaiKhoan
     {
         [Key]
+        [StringLength(50)]
         public string MaTaiKhoan { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Tên đăng nhập là bắt buộc")]

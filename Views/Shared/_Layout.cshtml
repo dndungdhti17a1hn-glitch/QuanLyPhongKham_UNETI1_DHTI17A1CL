@@ -33,37 +33,19 @@
                         @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Admin)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-primary fw-bold" asp-area="" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
+                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="ChuyenKhoa" asp-action="Index">Quản lý Chuyên khoa</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="KhamBenh" asp-action="Index">🩺 Tiếp nhận & Khám</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-success fw-bold" asp-area="" asp-controller="ThanhToan" asp-action="Index">💳 Thanh toán</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="ThongKe" asp-action="Index">📈 Thống kê</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="LichSuKham" asp-action="Index">📂 Lịch sử khám</a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    ⚙️ Danh mục
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" asp-controller="ChuyenKhoa" asp-action="Index">Quản lý Chuyên khoa</a></li>
-                                    <li><a class="dropdown-item" asp-controller="DichVuKham" asp-action="Index">Quản lý Dịch vụ</a></li>
-                                </ul>
+                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="DichVuKham" asp-action="Index">Quản lý Dịch vụ</a>
                             </li>
                         }
-                        else if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                        @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-primary fw-bold" asp-area="" asp-controller="BenhNhan" asp-action="Index">📅 Lịch khám của tôi</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="BenhNhan" asp-action="DatLich">📅 Đặt lịch khám</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-success fw-bold" asp-area="" asp-controller="BenhNhan" asp-action="DatLich">➕ Đặt lịch khám mới</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="BenhNhan" asp-action="Index">📋 Lịch sử khám</a>
                             </li>
                         }
                     </ul>
@@ -84,6 +66,9 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
                             </li>
                         }
                     </ul>

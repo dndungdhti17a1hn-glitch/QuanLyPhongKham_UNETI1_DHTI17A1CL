@@ -1,128 +1,967 @@
 @using QuanLyPhongKham.Services
 @using QuanLyPhongKham.Constants
 @inject ICurrentUser CurrentUser
-
 @{
-    ViewData["Title"] = "Hệ Thống Quản Lý Phòng Khám UNETI";
+    Layout = null;
+    ViewData["Title"] = "Phòng Khám Đa Khoa UN1 - Chăm Sóc Sức Khỏe Toàn Diện";
 }
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hiệu ứng mượt cho Modal */
+        .modal-enter {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 bg-slate-50 antialiased selection:bg-medical-500 selection:text-white">
 
-<div class="container py-4">
-    <!-- Hero Banner -->
-    <div class="p-5 mb-4 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25">
-        <div class="container-fluid py-2">
-            <h1 class="display-5 fw-bold text-primary">🏥 Hệ Thống Quản Lý Phòng Khám Y Tế</h1>
-            <p class="col-md-9 fs-5 text-secondary">
-                Giải pháp số hóa toàn diện quy trình y tế: Tiếp nhận bệnh nhân, Lập phiếu khám bệnh, Tính viện phí thực tế, Thống kê thông minh LINQ và Bảo toàn hồ sơ bệnh án.
-            </p>
+    <!-- Thông báo Toast (Thay thế alert) -->
+    <div id="toast" class="fixed top-20 right-5 z-50 hidden transform transition-all duration-300">
+        <div class="bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 border-l-4 border-medical-500">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-medical-500 text-xl"></i>
+            <div>
+                <h4 id="toast-title" class="font-semibold text-sm">Thành công!</h4>
+                <p id="toast-message" class="text-xs text-slate-300 mt-0.5">Thao tác đã được thực hiện.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh Điều Hướng (Navbar) -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a href="#home" class="flex items-center space-x-3 group">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-medical-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-medical-500/20 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-staff-snake text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold bg-gradient-to-r from-medical-800 to-cyan-700 bg-clip-text text-transparent block leading-none">UN1</span>
+                        <span class="text-xs text-slate-500 font-medium tracking-wider">CLINIC & HEALTHCARE</span>
+                    </div>
+                </a>
+
+                <!-- Menu Desktop -->
+                <nav class="hidden md:flex space-x-8 font-medium text-sm text-slate-600">
+                    <a href="#home" class="hover:text-medical-600 transition py-2">Trang chủ</a>
+                    <a href="#about" class="hover:text-medical-600 transition py-2">Về chúng tôi</a>
+                    <a href="#services" class="hover:text-medical-600 transition py-2">Chuyên khoa</a>
+                    <a href="#doctors" class="hover:text-medical-600 transition py-2">Đội ngũ Bác sĩ</a>
+                    <a href="#contact" class="hover:text-medical-600 transition py-2">Liên hệ</a>
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="text-medical-600 font-semibold hover:text-medical-700 transition py-2">
+                            <i class="fa-regular fa-calendar-plus mr-1"></i>Đặt lịch
+                        </a>
+                        <a href="@Url.Action("Index", "BenhNhan")" class="text-medical-600 font-semibold hover:text-medical-700 transition py-2">
+                            <i class="fa-solid fa-clipboard-list mr-1"></i>Hồ sơ khám
+                        </a>
+                    }
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Admin)
+                    {
+                        <a href="@Url.Action("Index", "ChuyenKhoa")" class="text-medical-600 font-semibold hover:text-medical-700 transition py-2">
+                            <i class="fa-solid fa-gauge mr-1"></i>Trang quản trị
+                        </a>
+                    }
+                </nav>
+
+                <!-- Cụm nút Đăng Nhập & Đăng Ký (Desktop) -->
+                @if (!CurrentUser.IsAuthenticated)
+                {
+                    <div id="auth-buttons-desktop" class="hidden md:flex items-center space-x-3">
+                        <button onclick="openAuthModal('login')" class="px-5 py-2.5 rounded-xl font-semibold text-sm text-medical-700 hover:bg-medical-50 border border-transparent hover:border-medical-100 transition">
+                            <i class="fa-regular fa-user mr-1.5"></i>Đăng nhập
+                        </button>
+                        <button onclick="openAuthModal('register')" class="px-5 py-2.5 rounded-xl font-semibold text-sm bg-medical-600 hover:bg-medical-700 text-white shadow-md shadow-medical-500/20 transition transform hover:-translate-y-0.5">
+                            Đăng ký ngay
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <!-- Thông tin User sau khi đăng nhập -->
+                    <div id="user-profile-desktop" class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2.5 bg-slate-100 px-3.5 py-2 rounded-xl">
+                            <div class="w-8 h-8 rounded-full bg-medical-600 text-white flex items-center justify-center font-bold text-sm" id="user-avatar">
+                                @(string.IsNullOrEmpty(CurrentUser.HoTen) ? "U" : CurrentUser.HoTen.Substring(0, 1).ToUpper())
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xs text-slate-500 leading-none">Xin chào,</p>
+                                <p class="text-sm font-bold text-slate-800" id="user-name-display">@CurrentUser.HoTen</p>
+                            </div>
+                        </div>
+                        <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="inline m-0 p-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" title="Đăng xuất" class="p-2.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </button>
+                        </form>
+                    </div>
+                }
+
+                <!-- Nút Menu Mobile -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="text-slate-600 hover:text-medical-600 p-2 rounded-lg focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Mobile -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 px-4 pt-3 pb-6 space-y-3 shadow-lg">
+            <a href="#home" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-medical-50 hover:text-medical-600">Trang chủ</a>
+            <a href="#about" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-medical-50 hover:text-medical-600">Về chúng tôi</a>
+            <a href="#services" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-medical-50 hover:text-medical-600">Chuyên khoa</a>
+            <a href="#doctors" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-medical-50 hover:text-medical-600">Đội ngũ Bác sĩ</a>
+            <a href="#contact" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-medical-50 hover:text-medical-600">Liên hệ</a>
+            
             @if (CurrentUser.IsAuthenticated)
             {
-                <div class="mt-4">
-                    <span class="fs-5 me-3">Xin chào, <strong class="text-primary">@CurrentUser.HoTen</strong> (@CurrentUser.VaiTro)</span>
+                <div class="pt-2 border-t border-slate-100">
+                    <div class="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl mb-3">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-8 h-8 rounded-full bg-medical-600 text-white flex items-center justify-center font-bold text-sm">
+                                @(string.IsNullOrEmpty(CurrentUser.HoTen) ? "U" : CurrentUser.HoTen.Substring(0, 1).ToUpper())
+                            </div>
+                            <span class="text-sm font-semibold text-slate-800">@CurrentUser.HoTen</span>
+                        </div>
+                        <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="inline m-0 p-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="text-xs text-red-600 hover:underline font-semibold">Đăng xuất</button>
+                        </form>
+                    </div>
+                    @if (CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="block w-full py-2.5 rounded-xl font-semibold text-sm bg-medical-600 text-white shadow-md text-center mb-2">
+                            <i class="fa-regular fa-calendar-check mr-1.5"></i>Đặt lịch khám
+                        </a>
+                        <a href="@Url.Action("Index", "BenhNhan")" class="block w-full py-2.5 rounded-xl font-semibold text-sm text-medical-700 bg-medical-50 border border-medical-200 text-center">
+                            <i class="fa-solid fa-clipboard-list mr-1.5"></i>Lịch sử khám
+                        </a>
+                    }
                     @if (CurrentUser.VaiTro == AppRoles.Admin)
                     {
-                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-primary btn-lg px-4 me-2">📊 Vào Dashboard</a>
-                        <a asp-controller="KhamBenh" asp-action="Index" class="btn btn-outline-primary btn-lg px-4">🩺 Tiếp nhận & Khám</a>
-                    }
-                    else
-                    {
-                        <a asp-controller="BenhNhan" asp-action="Index" class="btn btn-primary btn-lg px-4 me-2">📅 Lịch sử khám</a>
-                        <a asp-controller="BenhNhan" asp-action="DatLich" class="btn btn-success btn-lg px-4">➕ Đặt lịch khám</a>
+                        <a href="@Url.Action("Index", "ChuyenKhoa")" class="block w-full py-2.5 rounded-xl font-semibold text-sm bg-medical-600 text-white shadow-md text-center">
+                            <i class="fa-solid fa-gauge mr-1.5"></i>Trang quản trị
+                        </a>
                     }
                 </div>
             }
             else
             {
-                <div class="mt-4">
-                    <a asp-controller="TaiKhoan" asp-action="DangNhap" class="btn btn-primary btn-lg px-4 me-2">🔑 Đăng nhập hệ thống</a>
-                    <div class="mt-3 p-3 bg-white rounded border d-inline-block small">
-                        <strong>Tài khoản thử nghiệm:</strong><br />
-                        • Admin: <code>admin</code> / Mật khẩu: <code>Admin@123</code><br />
-                        • Bệnh nhân: <code>benhnhan1</code> / Mật khẩu: <code>123456</code>
-                    </div>
+                <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3" id="auth-buttons-mobile">
+                    <button onclick="openAuthModal('login'); toggleMobileMenu()" class="w-full py-2.5 rounded-xl font-semibold text-sm text-medical-700 bg-medical-50 border border-medical-200 text-center">
+                        Đăng nhập
+                    </button>
+                    <button onclick="openAuthModal('register'); toggleMobileMenu()" class="w-full py-2.5 rounded-xl font-semibold text-sm bg-medical-600 text-white shadow-md text-center">
+                        Đăng ký
+                    </button>
                 </div>
             }
         </div>
+    </header>
+
+    <!-- Phần Mở Đầu (Hero Section) -->
+    <section id="home" class="relative overflow-hidden bg-gradient-to-b from-medical-50/70 via-white to-white pt-10 pb-20 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <!-- Cột Nội dung Trái -->
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center space-x-2 bg-medical-100/80 text-medical-800 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-medical-600 animate-ping"></span>
+                        <span>PHÒNG KHÁM ĐA KHOA TIÊU CHUẨN QUỐC TẾ</span>
+                    </div>
+                    
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                        Chăm Sóc Sức Khỏe <br class="hidden sm:inline" />
+                        <span class="bg-gradient-to-r from-medical-600 to-cyan-600 bg-clip-text text-transparent">Bằng Cả Trái Tim</span>
+                    </h1>
+                    
+                    <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        Phòng khám Đa khoa UN1 quy tụ đội ngũ Y Bác sĩ đầu ngành cùng hệ thống trang thiết bị chẩn đoán hình ảnh, xét nghiệm hiện đại bậc nhất, mang lại sự an tâm tuyệt đối cho bạn và gia đình.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                        @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                        {
+                            <a href="@Url.Action("DatLich", "BenhNhan")" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-medical-600 hover:bg-medical-700 text-white font-semibold shadow-lg shadow-medical-500/25 flex items-center justify-center space-x-2 transition transform hover:-translate-y-0.5">
+                                <i class="fa-regular fa-calendar-check"></i>
+                                <span>Đặt lịch khám ngay</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <button onclick="openBookingOrAuth()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-medical-600 hover:bg-medical-700 text-white font-semibold shadow-lg shadow-medical-500/25 flex items-center justify-center space-x-2 transition transform hover:-translate-y-0.5">
+                                <i class="fa-regular fa-calendar-check"></i>
+                                <span>Đặt lịch khám ngay</span>
+                            </button>
+                        }
+                        <a href="#services" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold border border-slate-200 shadow-sm flex items-center justify-center space-x-2 transition">
+                            <span>Tìm hiểu dịch vụ</span>
+                            <i class="fa-solid fa-arrow-right text-sm text-slate-400"></i>
+                        </a>
+                    </div>
+
+                    <!-- Chỉ số uy tín -->
+                    <div class="pt-8 grid grid-cols-3 gap-4 border-t border-slate-200/80 max-w-lg mx-auto lg:mx-0">
+                        <div>
+                            <p class="text-2xl sm:text-3xl font-bold text-slate-900">15+</p>
+                            <p class="text-xs sm:text-sm text-slate-500">Năm kinh nghiệm</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl sm:text-3xl font-bold text-slate-900">50+</p>
+                            <p class="text-xs sm:text-sm text-slate-500">Bác sĩ chuyên khoa</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl sm:text-3xl font-bold text-slate-900">99%</p>
+                            <p class="text-xs sm:text-sm text-slate-500">Khách hàng hài lòng</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột Hình ảnh Phải -->
+                <div class="lg:col-span-5 relative">
+                    <div class="relative mx-auto max-w-md lg:max-w-none">
+                        <div class="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-8 border-white bg-slate-200">
+                            <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80" 
+                                 onerror="this.src='https://placehold.co/600x750/0d9488/ffffff?text=Bac+Si+UN1'"
+                                 alt="Bác sĩ Phòng khám UN1" 
+                                 class="w-full h-full object-cover object-center">
+                        </div>
+                        
+                        <!-- Thẻ nổi 1: Hotline -->
+                        <div class="absolute -bottom-6 -left-4 sm:-left-8 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 flex items-center space-x-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-phone-volume animate-bounce"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-medium">Cấp cứu & Tư vấn 24/7</p>
+                                <p class="text-base font-bold text-slate-800">1900 888 999</p>
+                            </div>
+                        </div>
+
+                        <!-- Thẻ nổi 2: Bảo hiểm -->
+                        <div class="absolute top-6 -right-4 sm:-right-6 bg-white/95 backdrop-blur px-4 py-3 rounded-2xl shadow-xl border border-slate-100 flex items-center space-x-2.5">
+                            <i class="fa-solid fa-shield-heart text-medical-600 text-2xl"></i>
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">Hỗ trợ BHYT</p>
+                                <p class="text-[11px] text-slate-500">Bảo lãnh viện phí</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Giới thiệu về Phòng khám (About Section) -->
+    <section id="about" class="py-16 lg:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="grid grid-cols-2 gap-4">
+                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80" 
+                         onerror="this.src='https://placehold.co/400x500/e2e8f0/0f766e?text=Co+So+Vat+Chat'"
+                         alt="Không gian phòng khám" class="rounded-2xl shadow-md w-full h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&w=600&q=80" 
+                         onerror="this.src='https://placehold.co/400x500/e2e8f0/0f766e?text=Trang+Thiet+Bi'"
+                         alt="Thiết bị y tế" class="rounded-2xl shadow-md w-full h-64 object-cover mt-8">
+                </div>
+                <div class="space-y-6">
+                    <div class="text-medical-600 font-semibold text-sm tracking-wider uppercase">Về Phòng Khám UN1</div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight">
+                        Nơi Gửi Trọn Niềm Tin Sức Khỏe Của Mọi Gia Đình Việt
+                    </h2>
+                    <p class="text-slate-600 leading-relaxed">
+                        Được thành lập với sứ mệnh mang dịch vụ y tế chất lượng cao đến gần hơn với cộng đồng, Phòng khám Đa khoa UN1 không ngừng đầu tư vào hệ thống máy móc hiện đại nhập khẩu từ Đức, Mỹ, Nhật Bản và xây dựng quy trình thăm khám nhanh gọn, không phải chờ đợi.
+                    </p>
+                    <div class="space-y-4 pt-2">
+                        <div class="flex items-start space-x-3.5">
+                            <div class="w-6 h-6 rounded-full bg-medical-100 text-medical-600 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fa-solid fa-check text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900">Hồ sơ bệnh án điện tử bảo mật</h4>
+                                <p class="text-sm text-slate-500">Đăng ký tài khoản để tra cứu kết quả xét nghiệm và lịch sử khám bệnh mọi lúc mọi nơi.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3.5">
+                            <div class="w-6 h-6 rounded-full bg-medical-100 text-medical-600 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fa-solid fa-check text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900">Chi phí minh bạch, hợp lý</h4>
+                                <p class="text-sm text-slate-500">Bảng giá niêm yết công khai, áp dụng thanh toán Bảo hiểm Y tế và bảo hiểm thương mại.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Các Chuyên Khoa (Services Section) -->
+    <section id="services" class="py-16 lg:py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-medical-600 font-semibold text-sm tracking-wider uppercase">Chuyên Khoa Mũi Nhọn</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Dịch Vụ Y Tế Toàn Diện</h2>
+                <p class="text-slate-600">Đáp ứng đầy đủ nhu cầu thăm khám, tầm soát và điều trị chuyên sâu cho mọi lứa tuổi.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Khoa 1 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition group">
+                    <div class="w-14 h-14 rounded-2xl bg-medical-50 text-medical-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-medical-600 group-hover:text-white transition">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Nội Tổng Quát & Tim Mạch</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Tầm soát, chẩn đoán và điều trị các bệnh lý tăng huyết áp, mạch vành, rối loạn nhịp tim, tiểu đường và hô hấp.
+                    </p>
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button onclick="openBookingOrAuth()" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </button>
+                    }
+                </div>
+
+                <!-- Khoa 2 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition group">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-cyan-600 group-hover:text-white transition">
+                        <i class="fa-solid fa-baby"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Khoa Nhi Toàn Diện</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Khám bệnh lý hô hấp, tiêu hóa, dinh dưỡng trẻ em và tư vấn tiêm chủng vắc-xin phòng bệnh theo độ tuổi.
+                    </p>
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button onclick="openBookingOrAuth()" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </button>
+                    }
+                </div>
+
+                <!-- Khoa 3 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition group">
+                    <div class="w-14 h-14 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-pink-600 group-hover:text-white transition">
+                        <i class="fa-solid fa-person-pregnant"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Sản Phụ Khoa</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Siêu âm thai 4D/5D, theo dõi thai kỳ trọn gói, tầm soát ung thư cổ tử cung và chăm sóc sức khỏe sinh sản.
+                    </p>
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button onclick="openBookingOrAuth()" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </button>
+                    }
+                </div>
+
+                <!-- Khoa 4 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition group">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-amber-600 group-hover:text-white transition">
+                        <i class="fa-solid fa-tooth"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Răng Hàm Mặt</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Nha khoa thẩm mỹ, cấy ghép Implant, chỉnh nha niềng răng và điều trị tủy không đau với công nghệ vô trùng.
+                    </p>
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button onclick="openBookingOrAuth()" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </button>
+                    }
+                </div>
+
+                <!-- Khoa 5 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition group">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-purple-600 group-hover:text-white transition">
+                        <i class="fa-solid fa-head-side-mask"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Tai Mũi Họng</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Nội soi Tai Mũi Họng ống mềm không đau, điều trị viêm xoang, viêm tai giữa, viêm amidan cho người lớn & trẻ nhỏ.
+                    </p>
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button onclick="openBookingOrAuth()" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </button>
+                    }
+                </div>
+
+                <!-- Khoa 6 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition group">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mb-6 group-hover:bg-emerald-600 group-hover:text-white transition">
+                        <i class="fa-solid fa-microscope"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Xét Nghiệm & Chẩn Đoán</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Xét nghiệm máu, sinh hóa, tầm soát ung thư sớm, chụp X-Quang kỹ thuật số và siêu âm màu độ phân giải cao.
+                    </p>
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button onclick="openBookingOrAuth()" class="text-medical-600 font-semibold text-sm inline-flex items-center group-hover:translate-x-1 transition">
+                            Đặt lịch khám <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Đội Ngũ Bác Sĩ (Doctors Section) -->
+    <section id="doctors" class="py-16 lg:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-medical-600 font-semibold text-sm tracking-wider uppercase">Chuyên Gia Đầu Ngành</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Đội Ngũ Bác Sĩ Tận Tâm</h2>
+                <p class="text-slate-600">Các Phó Giáo sư, Tiến sĩ, Bác sĩ Chuyên khoa II giàu kinh nghiệm từ các bệnh viện tuyến Trung ương.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Bác sĩ 1 -->
+                <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 hover:shadow-lg transition text-center group">
+                    <div class="aspect-square overflow-hidden bg-slate-200">
+                        <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=500&q=80" 
+                             onerror="this.src='https://placehold.co/400x400/0f766e/ffffff?text=BS.+Nguyen+Van+Minh'"
+                             alt="Bác sĩ Nguyễn Văn Minh" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-semibold text-medical-600 bg-medical-50 px-3 py-1 rounded-full">Tim Mạch - Nội Khoa</span>
+                        <h3 class="text-lg font-bold text-slate-900 mt-3">PGS.TS Nguyễn Văn Minh</h3>
+                        <p class="text-xs text-slate-500 mt-1">Nguyên Trưởng khoa Tim mạch BV Trung Ương</p>
+                    </div>
+                </div>
+
+                <!-- Bác sĩ 2 -->
+                <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 hover:shadow-lg transition text-center group">
+                    <div class="aspect-square overflow-hidden bg-slate-200">
+                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=500&q=80" 
+                             onerror="this.src='https://placehold.co/400x400/0f766e/ffffff?text=BS.+Tran+Thi+Lan'"
+                             alt="Bác sĩ Trần Thị Lan" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-semibold text-pink-600 bg-pink-50 px-3 py-1 rounded-full">Sản Phụ Khoa</span>
+                        <h3 class="text-lg font-bold text-slate-900 mt-3">BS.CKII Trần Thị Hương Lan</h3>
+                        <p class="text-xs text-slate-500 mt-1">20 năm kinh nghiệm Sản Phụ khoa</p>
+                    </div>
+                </div>
+
+                <!-- Bác sĩ 3 -->
+                <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 hover:shadow-lg transition text-center group">
+                    <div class="aspect-square overflow-hidden bg-slate-200">
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=500&q=80" 
+                             onerror="this.src='https://placehold.co/400x400/0f766e/ffffff?text=BS.+Le+Hoang+Nam'"
+                             alt="Bác sĩ Lê Hoàng Nam" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-semibold text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full">Chuyên Khoa Nhi</span>
+                        <h3 class="text-lg font-bold text-slate-900 mt-3">TS.BS Lê Hoàng Nam</h3>
+                        <p class="text-xs text-slate-500 mt-1">Chuyên gia Hô hấp & Dinh dưỡng Nhi</p>
+                    </div>
+                </div>
+
+                <!-- Bác sĩ 4 -->
+                <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 hover:shadow-lg transition text-center group">
+                    <div class="aspect-square overflow-hidden bg-slate-200">
+                        <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=500&q=80" 
+                             onerror="this.src='https://placehold.co/400x400/0f766e/ffffff?text=BS.+Pham+Thu+Ha'"
+                             alt="Bác sĩ Phạm Thu Hà" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">Răng Hàm Mặt</span>
+                        <h3 class="text-lg font-bold text-slate-900 mt-3">ThS.BS Phạm Thu Hà</h3>
+                        <p class="text-xs text-slate-500 mt-1">Chuyên gia Chỉnh nha & Nha khoa thẩm mỹ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kêu gọi Đăng ký Thành viên (CTA Banner) -->
+    <section class="py-16 bg-gradient-to-r from-medical-700 to-cyan-700 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div class="space-y-3 text-center lg:text-left max-w-2xl">
+                <h2 class="text-2xl sm:text-3xl font-bold">Tạo Tài Khoản Bệnh Nhân Trực Tuyến Ngay Hôm Nay</h2>
+                <p class="text-medical-100 text-sm sm:text-base">
+                    Đăng ký thành viên miễn phí để đặt lịch khám ưu tiên, nhận thông báo nhắc lịch tái khám và quản lý hồ sơ sức khỏe gia đình trực tuyến.
+                </p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4 flex-shrink-0">
+                @if (!CurrentUser.IsAuthenticated)
+                {
+                    <button onclick="openAuthModal('register')" class="px-7 py-3.5 rounded-xl bg-white text-medical-800 font-bold text-sm hover:bg-medical-50 shadow-lg transition">
+                        Đăng ký tài khoản mới
+                    </button>
+                    <button onclick="openAuthModal('login')" class="px-7 py-3.5 rounded-xl bg-medical-800/60 hover:bg-medical-800 text-white font-semibold text-sm border border-medical-400/30 transition">
+                        Đăng nhập
+                    </button>
+                }
+                else
+                {
+                    @if (CurrentUser.VaiTro == AppRoles.Patient)
+                    {
+                        <a href="@Url.Action("DatLich", "BenhNhan")" class="px-7 py-3.5 rounded-xl bg-white text-medical-800 font-bold text-sm hover:bg-medical-50 shadow-lg transition">
+                            <i class="fa-regular fa-calendar-check mr-1.5"></i>Đặt lịch khám trực tuyến
+                        </a>
+                        <a href="@Url.Action("Index", "BenhNhan")" class="px-7 py-3.5 rounded-xl bg-medical-800/60 hover:bg-medical-800 text-white font-semibold text-sm border border-medical-400/30 transition">
+                            <i class="fa-solid fa-clipboard-list mr-1.5"></i>Xem hồ sơ bệnh án
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "ChuyenKhoa")" class="px-7 py-3.5 rounded-xl bg-white text-medical-800 font-bold text-sm hover:bg-medical-50 shadow-lg transition">
+                            <i class="fa-solid fa-gauge mr-1.5"></i>Vào trang quản trị
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Chân Trang & Liên Hệ (Footer) -->
+    <footer id="contact" class="bg-slate-900 text-slate-400 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-800">
+                <!-- Cột 1 -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-medical-500 flex items-center justify-center text-white">
+                            <i class="fa-solid fa-staff-snake text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-white">PHÒNG KHÁM UN1</span>
+                    </div>
+                    <p class="text-sm leading-relaxed">
+                        Hệ thống Phòng khám Đa khoa tiêu chuẩn quốc tế. Tận tâm - Chuyên nghiệp - Hiện đại vì sức khỏe cộng đồng.
+                    </p>
+                    <div class="flex space-x-3 pt-2">
+                        <a href="#contact" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-medical-600 text-white flex items-center justify-center transition"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#contact" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-medical-600 text-white flex items-center justify-center transition"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#contact" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-medical-600 text-white flex items-center justify-center transition"><i class="fa-solid fa-envelope"></i></a>
+                    </div>
+                </div>
+
+                <!-- Cột 2 -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Liên Kết Nhanh</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="#about" class="hover:text-medical-400 transition">Giới thiệu phòng khám</a></li>
+                        <li><a href="#services" class="hover:text-medical-400 transition">Danh mục chuyên khoa</a></li>
+                        <li><a href="#doctors" class="hover:text-medical-400 transition">Đội ngũ bác sĩ</a></li>
+                        <li><a href="javascript:void(0)" onclick="openAuthModal('login')" class="hover:text-medical-400 transition">Tra cứu kết quả xét nghiệm</a></li>
+                        <li><a href="javascript:void(0)" onclick="openAuthModal('register')" class="hover:text-medical-400 transition">Đăng ký thẻ thành viên</a></li>
+                    </ul>
+                </div>
+
+                <!-- Cột 3 -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Giờ Làm Việc</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        <li class="flex justify-between">
+                            <span>Thứ 2 - Thứ 7:</span>
+                            <span class="text-white font-medium">07:00 - 20:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Chủ Nhật & Lễ:</span>
+                            <span class="text-white font-medium">07:30 - 17:00</span>
+                        </li>
+                        <li class="pt-2 text-medical-400 font-medium">
+                            <i class="fa-solid fa-truck-medical mr-1.5"></i> Trực cấp cứu: 24/24
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Cột 4 -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Thông Tin Liên Hệ</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-location-dot text-medical-500 mt-1"></i>
+                            <span>Số 128 Đường Nguyễn Trãi, Quận Thanh Xuân, TP. Hà Nội</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fa-solid fa-phone text-medical-500"></i>
+                            <span>Hotline: <strong class="text-white">1900 888 999</strong></span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fa-solid fa-envelope text-medical-500"></i>
+                            <span>cskh@phongkhamun1.vn</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 text-center text-xs text-slate-500">
+                <p>&copy; 2026 Phòng Khám Đa Khoa UN1. Bảo lưu mọi quyền.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         MODAL ĐĂNG NHẬP & ĐĂNG KÝ (AUTH MODAL)
+         ========================================== -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden modal-enter relative border border-slate-100">
+            
+            <!-- Nút đóng Modal -->
+            <button type="button" onclick="closeAuthModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Header Modal & Tabs Chuyển Đổi -->
+            <div class="p-6 sm:p-8 pb-0">
+                <div class="flex items-center space-x-2.5 mb-6">
+                    <div class="w-9 h-9 rounded-xl bg-medical-600 text-white flex items-center justify-center">
+                        <i class="fa-solid fa-staff-snake"></i>
+                    </div>
+                    <span class="font-bold text-lg text-slate-800">Cổng Bệnh Nhân UN1</span>
+                </div>
+
+                <!-- Thanh chuyển Tab Đăng nhập / Đăng ký -->
+                <div class="grid grid-cols-2 bg-slate-100 p-1.5 rounded-xl mb-6">
+                    <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2.5 text-sm font-bold rounded-lg transition bg-white text-medical-700 shadow-sm">
+                        Đăng nhập
+                    </button>
+                    <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="py-2.5 text-sm font-bold rounded-lg transition text-slate-600 hover:text-slate-900">
+                        Đăng ký
+                    </button>
+                </div>
+            </div>
+
+            <!-- FORM ĐĂNG NHẬP -->
+            <form id="form-login" asp-controller="TaiKhoan" asp-action="DangNhap" method="post" class="px-6 sm:px-8 pb-8 space-y-4">
+                @Html.AntiForgeryToken()
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Tên đăng nhập *</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-user absolute left-3.5 top-3.5 text-slate-400"></i>
+                        <input type="text" name="TenDangNhap" id="login-identifier" required placeholder="Nhập tên đăng nhập của bạn" 
+                               class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Mật khẩu *</label>
+                        <a href="javascript:void(0)" onclick="showToast('Vui lòng liên hệ tổng đài 1900 888 999 để được hỗ trợ cấp lại mật khẩu!', 'Khôi phục mật khẩu')" class="text-xs text-medical-600 hover:underline font-medium">Quên mật khẩu?</a>
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400"></i>
+                        <input type="password" name="MatKhau" id="login-password" required placeholder="••••••••" 
+                               class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition">
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="remember-me" class="rounded text-medical-600 focus:ring-medical-500">
+                    <label for="remember-me" class="text-xs text-slate-600">Ghi nhớ đăng nhập trên thiết bị này</label>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-medical-600 hover:bg-medical-700 text-white font-bold text-sm shadow-lg shadow-medical-500/25 transition mt-2">
+                    Đăng Nhập Ngay
+                </button>
+
+                <p class="text-center text-xs text-slate-500 pt-2">
+                    Chưa có hồ sơ bệnh nhân? 
+                    <a href="javascript:void(0)" onclick="switchAuthTab('register')" class="text-medical-600 font-bold hover:underline">Đăng ký ngay</a>
+                </p>
+                <p class="text-center text-[11px] text-slate-400">
+                    Hoặc tới <a href="@Url.Action("DangNhap", "TaiKhoan")" class="text-medical-600 underline">trang đăng nhập đầy đủ</a>
+                </p>
+            </form>
+
+            <!-- FORM ĐĂNG KÝ (Mặc định ẩn) -->
+            <form id="form-register" asp-controller="TaiKhoan" asp-action="DangKy" method="post" class="px-6 sm:px-8 pb-8 space-y-4 hidden">
+                @Html.AntiForgeryToken()
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Họ và tên bệnh nhân *</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-id-card absolute left-3.5 top-3.5 text-slate-400"></i>
+                        <input type="text" name="HoTen" id="reg-name" required placeholder="Ví dụ: Nguyễn Văn An" 
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Tên đăng nhập *</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" name="TenDangNhap" id="reg-username" required placeholder="Tên đăng nhập" 
+                                   class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Email *</label>
+                        <div class="relative">
+                            <i class="fa-regular fa-envelope absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input type="email" name="Email" id="reg-email" required placeholder="email@domain.com" 
+                                   class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Mật khẩu *</label>
+                        <input type="password" name="MatKhau" id="reg-password" required minlength="6" placeholder="Tối thiểu 6 ký tự" 
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Nhập lại MK *</label>
+                        <input type="password" name="XacNhanMatKhau" id="reg-confirm" required minlength="6" placeholder="Xác nhận mật khẩu" 
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition">
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-2 pt-1">
+                    <input type="checkbox" id="terms" required class="rounded text-medical-600 focus:ring-medical-500 mt-0.5">
+                    <label for="terms" class="text-xs text-slate-600 leading-normal">
+                        Tôi đồng ý với <span class="text-medical-600 font-semibold">Điều khoản dịch vụ</span> và <span class="text-medical-600 font-semibold">Chính sách bảo mật hồ sơ y tế</span>.
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-medical-600 hover:bg-medical-700 text-white font-bold text-sm shadow-lg shadow-medical-500/25 transition">
+                    Tạo Tài Khoản Bệnh Nhân
+                </button>
+
+                <p class="text-center text-xs text-slate-500 pt-1">
+                    Đã có tài khoản? 
+                    <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="text-medical-600 font-bold hover:underline">Đăng nhập</a>
+                </p>
+                <p class="text-center text-[11px] text-slate-400">
+                    Hoặc tới <a href="@Url.Action("DangKy", "TaiKhoan")" class="text-medical-600 underline">trang đăng ký chi tiết</a>
+                </p>
+            </form>
+        </div>
     </div>
 
-    <!-- Giới thiệu các chức năng Module 4 -->
-    <h3 class="fw-bold mb-4 text-dark border-bottom pb-2">🌟 Phân hệ Module 4 - Xử lý khám, Thanh toán và Thống kê</h3>
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0 border-top border-primary border-4">
-                <div class="card-body">
-                    <div class="fs-2 mb-2">📋</div>
-                    <h5 class="card-title fw-bold text-primary">8.1 & 8.2: Tiếp nhận & Khám bệnh</h5>
-                    <p class="card-text text-muted">
-                        Kiểm tra lịch xác nhận, cập nhật tiếp nhận vào phòng khám, và lập phiếu khám y tế kèm chỉ định dịch vụ kỹ thuật thực tế.
-                    </p>
-                    <a asp-controller="KhamBenh" asp-action="Index" class="btn btn-outline-primary btn-sm">Xem quy trình khám ➔</a>
-                </div>
-            </div>
-        </div>
+    <!-- JavaScript Xử Lý Tương Tác -->
+    <script>
+        // Mở/Đóng Menu trên điện thoại
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0 border-top border-success border-4">
-                <div class="card-body">
-                    <div class="fs-2 mb-2">💳</div>
-                    <h5 class="card-title fw-bold text-success">8.3: Thanh toán viện phí</h5>
-                    <p class="card-text text-muted">
-                        Tính tổng tiền chính xác từ các dịch vụ sử dụng thực tế. Cơ chế chống thanh toán 2 lần chặt chẽ và in hóa đơn y tế.
-                    </p>
-                    <a asp-controller="ThanhToan" asp-action="Index" class="btn btn-outline-success btn-sm">Quản lý thanh toán ➔</a>
-                </div>
-            </div>
-        </div>
+        // Mở Modal Đăng nhập hoặc Đăng ký
+        function openAuthModal(mode = 'login') {
+            const modal = document.getElementById('auth-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                switchAuthTab(mode);
+            }
+        }
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0 border-top border-warning border-4">
-                <div class="card-body">
-                    <div class="fs-2 mb-2">❌</div>
-                    <h5 class="card-title fw-bold text-warning-emphasis">8.4: Hủy lịch khám có lưu lý do</h5>
-                    <p class="card-text text-muted">
-                        Chỉ cho phép hủy lịch khi trạng thái cho phép (Chờ xác nhận / Đã xác nhận). Ghi nhận và bảo toàn lý do hủy trên hồ sơ.
-                    </p>
-                    <a asp-controller="KhamBenh" asp-action="Index" asp-route-status="Đã hủy" class="btn btn-outline-warning btn-sm">Xem lịch đã hủy ➔</a>
-                </div>
-            </div>
-        </div>
+        // Đóng Modal
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0 border-top border-info border-4">
-                <div class="card-body">
-                    <div class="fs-2 mb-2">📊</div>
-                    <h5 class="card-title fw-bold text-info">8.5: Dashboard tổng quan</h5>
-                    <p class="card-text text-muted">
-                        Theo dõi thời gian thực 7 chỉ số chủ chốt: Tổng bệnh nhân, Bác sĩ, Phòng khám, Lịch hẹn, Chờ duyệt, Lượt hoàn tất và Doanh thu.
-                    </p>
-                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-info btn-sm">Mở Dashboard ➔</a>
-                </div>
-            </div>
-        </div>
+        // Chuyển đổi qua lại giữa Tab Đăng nhập và Đăng ký
+        function switchAuthTab(mode) {
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const formLogin = document.getElementById('form-login');
+            const formRegister = document.getElementById('form-register');
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0 border-top border-danger border-4">
-                <div class="card-body">
-                    <div class="fs-2 mb-2">📈</div>
-                    <h5 class="card-title fw-bold text-danger">8.6: Báo cáo Thống kê LINQ</h5>
-                    <p class="card-text text-muted">
-                        Thực thi 6 thống kê LINQ nâng cao: Lịch theo chuyên khoa, Bác sĩ nhiều ca khám, Dịch vụ dùng nhiều, Doanh thu theo tháng, Tỷ lệ hoàn tất/hủy, Bệnh nhân theo tháng.
-                    </p>
-                    <a asp-controller="ThongKe" asp-action="Index" class="btn btn-outline-danger btn-sm">Xem biểu đồ thống kê ➔</a>
-                </div>
-            </div>
-        </div>
+            if (!tabLogin || !tabRegister || !formLogin || !formRegister) return;
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0 border-top border-dark border-4">
-                <div class="card-body">
-                    <div class="fs-2 mb-2">🛡️</div>
-                    <h5 class="card-title fw-bold text-dark">8.7: Bảo toàn lịch sử khám</h5>
-                    <p class="card-text text-muted">
-                        Chính sách bảo toàn toàn vẹn dữ liệu y khoa (Không Delete). Công cụ tra cứu tiền sử bệnh án theo Bệnh nhân và theo Bác sĩ.
-                    </p>
-                    <a asp-controller="LichSuKham" asp-action="Index" class="btn btn-outline-dark btn-sm">Tra cứu hồ sơ ➔</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+            if (mode === 'login') {
+                tabLogin.className = "py-2.5 text-sm font-bold rounded-lg transition bg-white text-medical-700 shadow-sm";
+                tabRegister.className = "py-2.5 text-sm font-bold rounded-lg transition text-slate-600 hover:text-slate-900";
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+            } else {
+                tabRegister.className = "py-2.5 text-sm font-bold rounded-lg transition bg-white text-medical-700 shadow-sm";
+                tabLogin.className = "py-2.5 text-sm font-bold rounded-lg transition text-slate-600 hover:text-slate-900";
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+            }
+        }
+
+        // Kiểm tra khi bấm nút "Đặt lịch khám" đối với khách vãng lai
+        function openBookingOrAuth() {
+            showToast('Vui lòng đăng nhập hoặc đăng ký tài khoản để đặt lịch khám ưu tiên!', 'Yêu cầu tài khoản');
+            openAuthModal('login');
+        }
+
+        // Validate xác nhận mật khẩu khi đăng ký
+        const regForm = document.getElementById('form-register');
+        if (regForm) {
+            regForm.addEventListener('submit', function (e) {
+                const pass = document.getElementById('reg-password').value;
+                const confirm = document.getElementById('reg-confirm').value;
+                if (pass !== confirm) {
+                    e.preventDefault();
+                    showToast('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!', 'Lỗi đăng ký', true);
+                }
+            });
+        }
+
+        // Hiển thị thông báo góc màn hình (Toast)
+        let toastTimeout;
+        function showToast(message, title = 'Thông báo', isError = false) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            if (!toast || !toastTitle || !toastMessage || !toastIcon) return;
+
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            if (isError) {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-xl";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check text-medical-500 text-xl";
+            }
+
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+
+        // Đóng modal khi click ra ngoài vùng trắng
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('auth-modal');
+            if (e.target === modal) {
+                closeAuthModal();
+            }
+        });
+
+        // Đóng modal khi nhấn phím Escape
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAuthModal();
+            }
+        });
+    </script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                showToast('@Html.Raw(TempData["SuccessMessage"])', 'Thành công');
+                @if (TempData["OpenLoginModal"] is true)
+                {
+                    <text>
+                    setTimeout(function() {
+                        openAuthModal('login');
+                        @if (TempData["RegisteredUsername"] != null)
+                        {
+                            <text>
+                            const inputUser = document.getElementById('login-identifier');
+                            if (inputUser) {
+                                inputUser.value = '@Html.Raw(TempData["RegisteredUsername"])';
+                            }
+                            const inputPass = document.getElementById('login-password');
+                            if (inputPass) {
+                                inputPass.focus();
+                            }
+                            </text>
+                        }
+                    }, 300);
+                    </text>
+                }
+            });
+        </script>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                showToast('@Html.Raw(TempData["ErrorMessage"])', 'Thông báo', true);
+            });
+        </script>
+    }
+</body>
+</html>

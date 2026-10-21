@@ -52,39 +52,22 @@
                         {
                             <span class="badge bg-info text-dark">@item.TrangThai</span>
                         }
-                        @if (item.TrangThai == "Hoàn tất" || item.TrangThai == "Chờ thanh toán")
+                        else if (item.TrangThai == "Hoàn tất")
                         {
                             <span class="badge bg-success">@item.TrangThai</span>
-                        }
-                        else if (item.TrangThai == "Chờ xác nhận")
-                        {
-                            <span class="badge bg-warning text-dark">@item.TrangThai</span>
-                        }
-                        else if (item.TrangThai == "Đã xác nhận" || item.TrangThai == "Đã tiếp nhận")
-                        {
-                            <span class="badge bg-info text-dark">@item.TrangThai</span>
                         }
                         else
                         {
                             <span class="badge bg-danger">@item.TrangThai</span>
-                            @if (!string.IsNullOrEmpty(item.LyDoHuy))
-                            {
-                                <div><small class="text-danger fst-italic">(@item.LyDoHuy)</small></div>
-                            }
                         }
                     </td>
                     <td>
-                        @if (item.PhieuKham != null)
-                        {
-                            <a asp-action="XemKetQuaKham" asp-route-id="@item.PhieuKham.MaPhieuKham" class="btn btn-sm btn-info text-white mb-1">
-                                📋 Xem kết quả
-                            </a>
-                        }
                         @if (item.TrangThai == "Chờ xác nhận")
                         {
-                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalPatientHuy" data-malich="@item.MaLichHen">
-                                ❌ Hủy lịch
-                            </button>
+                            <form asp-action="HuyLich" asp-route-id="@item.MaLichHen" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">Hủy lịch</button>
+                            </form>
                         }
                     </td>
                 </tr>
@@ -92,43 +75,3 @@
         </tbody>
     </table>
 </div>
-
-<!-- Modal Hủy lịch bệnh nhân -->
-<div class="modal fade" id="modalPatientHuy" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="HuyLich" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" id="patientHuyMaLich" />
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Xác nhận hủy lịch hẹn</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Bạn có chắc chắn muốn hủy lịch hẹn này?</p>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Lý do hủy lịch:</label>
-                        <input type="text" name="lyDoHuy" class="form-control" placeholder="Nhập lý do hủy (ví dụ: bận việc đột xuất...)" required />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-danger">Hủy lịch</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        var modalPatientHuy = document.getElementById('modalPatientHuy');
-        if (modalPatientHuy) {
-            modalPatientHuy.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var maLich = button.getAttribute('data-malich');
-                document.getElementById('patientHuyMaLich').value = maLich;
-            });
-        }
-    </script>
-}
