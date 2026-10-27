@@ -2,11 +2,17 @@
 
 @{
     ViewData["Title"] = "Quản lý Dịch vụ khám";
-    var prevDisabled = (int)ViewData["PageIndex"]! == 1 ? "disabled" : "";
-    var nextDisabled = (int)ViewData["PageIndex"]! == (int)ViewData["TotalPages"]! ? "disabled" : "";
+    int pageIndex = (int)(ViewData["PageIndex"] ?? 1);
+    int totalPages = (int)(ViewData["TotalPages"] ?? 1);
+    string? currentSort = ViewData["CurrentSort"] as string;
+    string? currentFilter = ViewData["CurrentFilter"] as string;
+    int? trangThaiFilter = ViewData["TrangThaiFilter"] as int?;
 }
 
-<h2>Danh sách Dịch vụ khám</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Danh sách Dịch vụ khám</h2>
+    <a asp-action="Create" class="btn btn-primary">+ Thêm mới</a>
+</div>
 
 @if (TempData["SuccessMessage"] != null)
 {
@@ -17,66 +23,118 @@
     <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
 }
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Thêm mới</a>
-</p>
-
-<form asp-action="Index" method="get" class="mb-3">
-    <input type="hidden" name="sortOrder" value="@ViewData["CurrentSort"]" />
-    <div class="input-group">
-        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Tìm kiếm dịch vụ khám..." />
-        <button class="btn btn-outline-secondary" type="submit">Tìm kiếm</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Xóa tìm kiếm</a>
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <input type="hidden" name="sortOrder" value="@currentSort" />
+    <div class="col-md-6">
+        <input type="text" name="searchString" value="@currentFilter" class="form-control" placeholder="Tìm kiếm theo mã hoặc tên dịch vụ khám..." />
+    </div>
+    <div class="col-md-4">
+        <select name="trangThaiFilter" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="1" selected="@(trangThaiFilter == 1)">Hoạt động</option>
+            <option value="0" selected="@(trangThaiFilter == 0)">Ngừng cung cấp</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-1">
+        <button class="btn btn-secondary w-100" type="submit">Tìm / Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
     </div>
 </form>
 
-<table class="table table-bordered table-striped">
-    <thead>
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-light">
         <tr>
             <th>Mã DV</th>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]">
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["NameSortParm"]"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">
                     Tên dịch vụ
                 </a>
             </th>
-            <th>Giá tiền</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["PriceSortParm"]"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">
+                    Giá tiền
+                </a>
+            </th>
+            <th>Mô tả</th>
             <th>Trạng thái</th>
-            <th>Thao tác</th>
+            <th class="text-center">Thao tác</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@item.MaDichVu</td>
-            <td>@item.TenDichVu</td>
-            <td>@item.GiaTien.ToString("N0") VNĐ</td>
-            <td>@(item.TrangThai == 1 ? "Hoạt động" : "Ngừng cung cấp")</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaDichVu" class="btn btn-sm btn-warning">Sửa</a> |
-                <a asp-action="Details" asp-route-id="@item.MaDichVu" class="btn btn-sm btn-info">Chi tiết</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaDichVu" class="btn btn-sm btn-danger">Xóa</a>
-            </td>
-        </tr>
-}
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">Không tìm thấy dịch vụ khám nào phù hợp.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MaDichVu</td>
+                    <td class="fw-semibold">@item.TenDichVu</td>
+                    <td class="text-primary fw-bold">@item.GiaTien.ToString("N0") VNĐ</td>
+                    <td>@item.MoTa</td>
+                    <td>
+                        @if (item.TrangThai == 1)
+                        {
+                            <span class="badge bg-success">Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Ngừng cung cấp</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <a asp-action="Edit" asp-route-id="@item.MaDichVu" class="btn btn-sm btn-warning">Sửa</a>
+                        <a asp-action="Details" asp-route-id="@item.MaDichVu" class="btn btn-sm btn-info">Chi tiết</a>
+                        <a asp-action="Delete" asp-route-id="@item.MaDichVu" class="btn btn-sm btn-danger">Xóa</a>
+                    </td>
+                </tr>
+            }
+        }
     </tbody>
 </table>
 
-<div>
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-pageNumber="@((int)ViewData["PageIndex"]! - 1)"
-       asp-route-searchString="@ViewData["CurrentFilter"]"
-       class="btn btn-outline-primary @prevDisabled">
-        Trước
-    </a>
-    
-    <span>Trang @ViewData["PageIndex"] / @Math.Max((int)ViewData["TotalPages"]!, 1)</span>
-    
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-pageNumber="@((int)ViewData["PageIndex"]! + 1)"
-       asp-route-searchString="@ViewData["CurrentFilter"]"
-       class="btn btn-outline-primary @nextDisabled">
-        Tiếp
-    </a>
-</div>
+@if (totalPages > 0)
+{
+    <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-3">
+        <span class="text-muted">Trang <strong>@pageIndex</strong> / <strong>@totalPages</strong> (Tổng: @ViewData["TotalRecords"] bản ghi)</span>
+        <ul class="pagination mb-0">
+            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-sortOrder="@currentSort"
+                   asp-route-pageNumber="@(pageIndex - 1)"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">Trước</a>
+            </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageIndex ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-sortOrder="@currentSort"
+                       asp-route-pageNumber="@i"
+                       asp-route-searchString="@currentFilter"
+                       asp-route-trangThaiFilter="@trangThaiFilter">@i</a>
+                </li>
+            }
+            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-sortOrder="@currentSort"
+                   asp-route-pageNumber="@(pageIndex + 1)"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">Tiếp</a>
+            </li>
+        </ul>
+    </nav>
+}

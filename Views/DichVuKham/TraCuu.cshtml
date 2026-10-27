@@ -1,0 +1,84 @@
+@model IEnumerable<QuanLyPhongKham.Models.DichVuKham>
+@{
+    ViewData["Title"] = "Tra cứu Dịch vụ khám";
+    int pageIndex = (int)(ViewData["PageIndex"] ?? 1);
+    int totalPages = (int)(ViewData["TotalPages"] ?? 1);
+    string? currentSort = ViewData["CurrentSort"] as string;
+    string? currentFilter = ViewData["CurrentFilter"] as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Bảng giá Dịch vụ Khám chữa bệnh</h2>
+    <a asp-controller="BenhNhan" asp-action="DatLich" class="btn btn-success">📅 Đặt lịch khám ngay</a>
+</div>
+
+<form asp-action="TraCuu" method="get" class="row g-2 mb-3">
+    <input type="hidden" name="sortOrder" value="@currentSort" />
+    <div class="col-md-9">
+        <input type="text" name="searchString" value="@currentFilter" class="form-control" placeholder="Tìm kiếm tên dịch vụ khám, xét nghiệm, siêu âm..." />
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <button class="btn btn-primary w-100" type="submit">Tìm kiếm</button>
+        <a asp-action="TraCuu" class="btn btn-outline-secondary">Xóa</a>
+    </div>
+</form>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Mã DV</th>
+            <th>
+                <a asp-action="TraCuu" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@currentFilter">
+                    Tên dịch vụ khám
+                </a>
+            </th>
+            <th>
+                <a asp-action="TraCuu" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-searchString="@currentFilter">
+                    Đơn giá niêm yết
+                </a>
+            </th>
+            <th>Mô tả chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">Không tìm thấy dịch vụ khám nào phù hợp.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><span class="badge bg-secondary">@item.MaDichVu</span></td>
+                    <td class="fw-semibold">@item.TenDichVu</td>
+                    <td class="text-danger fw-bold">@item.GiaTien.ToString("N0") VNĐ</td>
+                    <td>@item.MoTa</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (totalPages > 0)
+{
+    <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-3">
+        <span class="text-muted">Trang <strong>@pageIndex</strong> / <strong>@totalPages</strong></span>
+        <ul class="pagination mb-0">
+            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@(pageIndex - 1)" asp-route-searchString="@currentFilter">Trước</a>
+            </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageIndex ? "active" : "")">
+                    <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@i" asp-route-searchString="@currentFilter">@i</a>
+                </li>
+            }
+            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@(pageIndex + 1)" asp-route-searchString="@currentFilter">Tiếp</a>
+            </li>
+        </ul>
+    </nav>
+}
