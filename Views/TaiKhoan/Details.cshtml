@@ -1,0 +1,43 @@
+@model QuanLyPhongKham.Models.TaiKhoan
+@using QuanLyPhongKham.Constants
+@{
+    ViewData["Title"] = "Chi tiết tài khoản";
+}
+
+<h2>Chi tiết tài khoản</h2>
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.MaTaiKhoan)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.MaTaiKhoan)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TenDangNhap)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TenDangNhap)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.HoTen)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.HoTen)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.VaiTro)</dt>
+        <dd class="col-sm-9">@(Model.VaiTro == AppRoles.Admin ? "Admin" : "Bệnh nhân")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TrangThai)</dt>
+        <dd class="col-sm-9">
+            @if (Model.TrangThai == 1)
+            {
+                <span class="badge bg-success">Hoạt động</span>
+            }
+            else
+            {
+                <span class="badge bg-danger">Đã khóa</span>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.MaTaiKhoan" class="btn btn-warning">Sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+</div>

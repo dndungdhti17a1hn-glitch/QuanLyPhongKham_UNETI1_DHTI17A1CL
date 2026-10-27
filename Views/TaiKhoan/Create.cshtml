@@ -1,0 +1,73 @@
+@model QuanLyPhongKham.Models.ViewModels.TaiKhoanCreateViewModel
+@using QuanLyPhongKham.Constants
+@{
+    ViewData["Title"] = "Thêm mới tài khoản";
+}
+
+<h2>Thêm mới tài khoản</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MaTaiKhoan" class="control-label"></label>
+                <input asp-for="MaTaiKhoan" class="form-control" />
+                <span asp-validation-for="MaTaiKhoan" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="TenDangNhap" class="control-label"></label>
+                <input asp-for="TenDangNhap" class="form-control" />
+                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MatKhau" class="control-label"></label>
+                <input asp-for="MatKhau" class="form-control" />
+                <span asp-validation-for="MatKhau" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="HoTen" class="control-label"></label>
+                <input asp-for="HoTen" class="form-control" />
+                <span asp-validation-for="HoTen" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="VaiTro" class="control-label"></label>
+                <select asp-for="VaiTro" class="form-select">
+                    <option value="@AppRoles.Patient">Bệnh nhân</option>
+                    <option value="@AppRoles.Admin">Admin</option>
+                </select>
+                <span asp-validation-for="VaiTro" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="TrangThai" class="control-label"></label>
+                <select asp-for="TrangThai" class="form-select">
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Khóa tài khoản</option>
+                </select>
+                <span asp-validation-for="TrangThai" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
