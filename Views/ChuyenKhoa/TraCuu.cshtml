@@ -1,0 +1,75 @@
+@model IEnumerable<QuanLyPhongKham.Models.ChuyenKhoa>
+@{
+    ViewData["Title"] = "Tra cứu Chuyên khoa";
+    int pageIndex = (int)(ViewData["PageIndex"] ?? 1);
+    int totalPages = (int)(ViewData["TotalPages"] ?? 1);
+    string? currentSort = ViewData["CurrentSort"] as string;
+    string? currentFilter = ViewData["CurrentFilter"] as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Tra cứu Danh mục Chuyên khoa</h2>
+    <a asp-controller="BenhNhan" asp-action="DatLich" class="btn btn-success">📅 Đặt lịch khám ngay</a>
+</div>
+
+<form asp-action="TraCuu" method="get" class="row g-2 mb-4">
+    <input type="hidden" name="sortOrder" value="@currentSort" />
+    <div class="col-md-8">
+        <input type="text" name="searchString" value="@currentFilter" class="form-control" placeholder="Tìm kiếm tên chuyên khoa hoặc triệu chứng/mô tả..." />
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+        <button class="btn btn-primary w-100" type="submit">Tìm kiếm</button>
+        <a asp-action="TraCuu" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@currentFilter" class="btn btn-outline-secondary w-100">
+            Sắp xếp A-Z / Z-A
+        </a>
+        <a asp-action="TraCuu" class="btn btn-outline-secondary">Xóa</a>
+    </div>
+</form>
+
+<div class="row g-3">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="alert alert-info">Không tìm thấy chuyên khoa nào phù hợp với từ khóa.</div>
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <span class="badge bg-info text-dark mb-2">@item.MaChuyenKhoa</span>
+                        <h5 class="card-title text-primary fw-bold">@item.TenChuyenKhoa</h5>
+                        <p class="card-text text-muted">@(string.IsNullOrEmpty(item.MoTa) ? "Chuyên khoa khám và điều trị chuyên sâu với đội ngũ bác sĩ giàu kinh nghiệm." : item.MoTa)</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <a asp-controller="BenhNhan" asp-action="DatLich" class="btn btn-sm btn-outline-primary w-100">Đặt lịch khám</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@if (totalPages > 0)
+{
+    <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-4">
+        <span class="text-muted">Trang <strong>@pageIndex</strong> / <strong>@totalPages</strong></span>
+        <ul class="pagination mb-0">
+            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@(pageIndex - 1)" asp-route-searchString="@currentFilter">Trước</a>
+            </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageIndex ? "active" : "")">
+                    <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@i" asp-route-searchString="@currentFilter">@i</a>
+                </li>
+            }
+            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@(pageIndex + 1)" asp-route-searchString="@currentFilter">Tiếp</a>
+            </li>
+        </ul>
+    </nav>
+}
