@@ -8,6 +8,7 @@ namespace QuanLyPhongKham.Services
         string? MaTaiKhoan { get; }
         string? HoTen { get; }
         string? VaiTro { get; }
+        string TenVaiTro { get; }
     }
 
     public class CurrentUser : ICurrentUser
@@ -28,5 +29,7 @@ namespace QuanLyPhongKham.Services
         public string? HoTen => Session?.GetString("HoTen");
 
         public string? VaiTro => Session?.GetString("VaiTro");
+
+        public string TenVaiTro => (VaiTro == "Admin") ? "Admin" : (IsAuthenticated ? "Bệnh nhân" : "");
     }
 }
