@@ -1,0 +1,175 @@
+@model IEnumerable<QuanLyPhongKham.Models.TaiKhoan>
+@using QuanLyPhongKham.Constants
+@{
+    ViewData["Title"] = "Quản lý Tài khoản";
+    int pageIndex = (int)(ViewData["PageIndex"] ?? 1);
+    int totalPages = (int)(ViewData["TotalPages"] ?? 1);
+    string? currentSort = ViewData["CurrentSort"] as string;
+    string? currentFilter = ViewData["CurrentFilter"] as string;
+    string? vaiTroFilter = ViewData["VaiTroFilter"] as string;
+    int? trangThaiFilter = ViewData["TrangThaiFilter"] as int?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Quản lý Tài khoản người dùng</h2>
+    <a asp-action="Create" class="btn btn-primary">+ Thêm mới tài khoản</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <input type="hidden" name="sortOrder" value="@currentSort" />
+    <div class="col-md-4">
+        <input type="text" name="searchString" value="@currentFilter" class="form-control" placeholder="Tìm theo tên đăng nhập, họ tên, email..." />
+    </div>
+    <div class="col-md-3">
+        <select name="vaiTroFilter" class="form-select">
+            <option value="">-- Tất cả vai trò --</option>
+            <option value="@AppRoles.Admin" selected="@(vaiTroFilter == AppRoles.Admin)">Admin</option>
+            <option value="@AppRoles.Patient" selected="@(vaiTroFilter == AppRoles.Patient)">Bệnh nhân</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="trangThaiFilter" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="1" selected="@(trangThaiFilter == 1)">Đang hoạt động</option>
+            <option value="0" selected="@(trangThaiFilter == 0)">Đã khóa</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-1">
+        <button class="btn btn-secondary w-100" type="submit">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Mã TK</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["UsernameSortParm"]"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-vaiTroFilter="@vaiTroFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">
+                    Tên đăng nhập
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["NameSortParm"]"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-vaiTroFilter="@vaiTroFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">
+                    Họ và tên
+                </a>
+            </th>
+            <th>Email</th>
+            <th>Vai trò</th>
+            <th>Trạng thái</th>
+            <th class="text-center">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">Không tìm thấy tài khoản nào phù hợp.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MaTaiKhoan</td>
+                    <td class="fw-semibold">@item.TenDangNhap</td>
+                    <td>@item.HoTen</td>
+                    <td>@item.Email</td>
+                    <td>
+                        @if (item.VaiTro == AppRoles.Admin)
+                        {
+                            <span class="badge bg-primary">Admin</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-info text-dark">Bệnh nhân</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.TrangThai == 1)
+                        {
+                            <span class="badge bg-success">Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Đã khóa</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <a asp-action="Edit" asp-route-id="@item.MaTaiKhoan" class="btn btn-sm btn-warning">Sửa</a>
+                        <a asp-action="Details" asp-route-id="@item.MaTaiKhoan" class="btn btn-sm btn-info">Chi tiết</a>
+                        <form asp-action="ToggleStatus" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline"
+                              onsubmit="return confirm('Bạn có chắc muốn thay đổi trạng thái tài khoản này?');">
+                            @Html.AntiForgeryToken()
+                            @if (item.TrangThai == 1)
+                            {
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Khóa</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-sm btn-outline-success">Mở khóa</button>
+                            }
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (totalPages > 0)
+{
+    <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-3">
+        <span class="text-muted">Trang <strong>@pageIndex</strong> / <strong>@totalPages</strong> (Tổng: @ViewData["TotalRecords"] bản ghi)</span>
+        <ul class="pagination mb-0">
+            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-sortOrder="@currentSort"
+                   asp-route-pageNumber="@(pageIndex - 1)"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-vaiTroFilter="@vaiTroFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">Trước</a>
+            </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageIndex ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-sortOrder="@currentSort"
+                       asp-route-pageNumber="@i"
+                       asp-route-searchString="@currentFilter"
+                       asp-route-vaiTroFilter="@vaiTroFilter"
+                       asp-route-trangThaiFilter="@trangThaiFilter">@i</a>
+                </li>
+            }
+            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-sortOrder="@currentSort"
+                   asp-route-pageNumber="@(pageIndex + 1)"
+                   asp-route-searchString="@currentFilter"
+                   asp-route-vaiTroFilter="@vaiTroFilter"
+                   asp-route-trangThaiFilter="@trangThaiFilter">Tiếp</a>
+            </li>
+        </ul>
+    </nav>
+}
