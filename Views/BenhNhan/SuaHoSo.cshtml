@@ -1,0 +1,185 @@
+@model QuanLyPhongKham.Models.ViewModels.HoSoBenhNhanViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Toast Thông báo -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="toast-success" class="fixed top-20 right-5 z-50 animate-slide-in">
+        <div class="bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-2xl"></i>
+            <div>
+                <p class="font-semibold">Thành công!</p>
+                <p class="text-sm opacity-90">@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => document.getElementById('toast-success')?.remove(), 5000);
+    </script>
+}
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Back button -->
+        <a asp-action="HoSo" class="inline-flex items-center text-amber-600 hover:text-amber-700 font-semibold mb-6 transition">
+            <i class="fa-solid fa-arrow-left mr-2"></i>Quay lại hồ sơ
+        </a>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Column (2/3) -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-sm border border-amber-200 p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-2xl">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Chỉnh Sửa Hồ Sơ</h2>
+                            <p class="text-sm text-slate-600">Cập nhật thông tin cá nhân của bạn</p>
+                        </div>
+                    </div>
+
+                    <form asp-action="SuaHoSo" method="post" class="space-y-6">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl text-sm"></div>
+
+                        <!-- Họ và tên -->
+                        <div>
+                            <label asp-for="HoTen" class="block text-sm font-semibold text-slate-700 mb-2">
+                                <i class="fa-solid fa-user text-amber-600 mr-2"></i>Họ và Tên <span class="text-red-500">*</span>
+                            </label>
+                            <input asp-for="HoTen" placeholder="Nhập họ và tên đầy đủ"
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition" />
+                            <span asp-validation-for="HoTen" class="text-red-600 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- Row: Ngày sinh + Giới tính -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label asp-for="NgaySinh" class="block text-sm font-semibold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-cake-candles text-amber-600 mr-2"></i>Ngày Sinh
+                                </label>
+                                <input asp-for="NgaySinh" type="date"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition" />
+                                <span asp-validation-for="NgaySinh" class="text-red-600 text-xs mt-1 block"></span>
+                            </div>
+                            <div>
+                                <label asp-for="GioiTinh" class="block text-sm font-semibold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-venus-mars text-amber-600 mr-2"></i>Giới Tính
+                                </label>
+                                <select asp-for="GioiTinh"
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition">
+                                    <option value="">— Chọn giới tính —</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                                <span asp-validation-for="GioiTinh" class="text-red-600 text-xs mt-1 block"></span>
+                            </div>
+                        </div>
+
+                        <!-- Row: SĐT + Email -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label asp-for="SoDienThoai" class="block text-sm font-semibold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-phone text-amber-600 mr-2"></i>Số Điện Thoại <span class="text-red-500">*</span>
+                                </label>
+                                <input asp-for="SoDienThoai" placeholder="09xxxxxxxx"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition" />
+                                <span asp-validation-for="SoDienThoai" class="text-red-600 text-xs mt-1 block"></span>
+                            </div>
+                            <div>
+                                <label asp-for="Email" class="block text-sm font-semibold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-envelope text-amber-600 mr-2"></i>Email <span class="text-red-500">*</span>
+                                </label>
+                                <input asp-for="Email" placeholder="email@example.com"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition" />
+                                <span asp-validation-for="Email" class="text-red-600 text-xs mt-1 block"></span>
+                            </div>
+                        </div>
+
+                        <!-- Địa chỉ -->
+                        <div>
+                            <label asp-for="DiaChi" class="block text-sm font-semibold text-slate-700 mb-2">
+                                <i class="fa-solid fa-location-dot text-amber-600 mr-2"></i>Địa Chỉ
+                            </label>
+                            <textarea asp-for="DiaChi" rows="2" placeholder="Số nhà, đường, phường, quận, TP"
+                                      class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition resize-none"></textarea>
+                            <span asp-validation-for="DiaChi" class="text-red-600 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- Submit buttons -->
+                        <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                            <button type="submit" class="flex-1 px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-lg shadow-amber-500/30 transition transform hover:-translate-y-0.5">
+                                <i class="fa-solid fa-floppy-disk mr-2"></i>Lưu thay đổi
+                            </button>
+                            <a asp-action="HoSo" class="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition text-center">
+                                <i class="fa-solid fa-times mr-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Cards Column (1/3) -->
+            <div class="space-y-6">
+                <!-- Card: Lưu ý khi chỉnh sửa -->
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+                    <h4 class="font-bold text-amber-900 mb-4 flex items-center text-lg">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i>Lưu Ý Khi Chỉnh Sửa
+                    </h4>
+                    <ul class="text-sm text-amber-800 space-y-3">
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check text-amber-600 mr-2 mt-0.5"></i>
+                            <span>Thông tin sẽ được sử dụng để liên hệ và xác nhận lịch hẹn</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check text-amber-600 mr-2 mt-0.5"></i>
+                            <span>Số điện thoại và email không được trùng với bệnh nhân khác</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check text-amber-600 mr-2 mt-0.5"></i>
+                            <span>Cập nhật email để nhận thông báo lịch khám mới nhất</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check text-amber-600 mr-2 mt-0.5"></i>
+                            <span>Hồ sơ thay đổi không ảnh hưởng đến lịch hẹn đã đặt</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card: Hỗ trợ -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                    <h4 class="font-bold text-slate-900 mb-3 flex items-center">
+                        <i class="fa-solid fa-headset text-amber-600 mr-2"></i>Đổi Thông Tin Không Được?
+                    </h4>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                        Nếu bạn không thể thay đổi số điện thoại hoặc email, vui lòng liên hệ tổng đài để được hỗ trợ.
+                    </p>
+                    <a href="tel:1900888999" class="inline-flex items-center justify-center w-full px-4 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition">
+                        <i class="fa-solid fa-phone mr-2"></i>1900 888 999
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@keyframes slide-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .animate-slide-in { animation: slide-in 0.3s ease-out; }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

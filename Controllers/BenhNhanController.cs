@@ -61,6 +61,8 @@ namespace QuanLyPhongKham.Controllers
                 .ThenByDescending(l => l.GioKham)
                 .ToListAsync();
 
+            ViewBag.BenhNhan = await _context.BenhNhans.FirstOrDefaultAsync(b => b.MaBenhNhan == maBenhNhan);
+
             return View(lichHens);
         }
 
@@ -184,6 +186,204 @@ namespace QuanLyPhongKham.Controllers
 
             TempData["SuccessMessage"] = "Hủy lịch hẹn thành công.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // 7.1: XEM HỒ SƠ CÁ NHÂN
+        [HttpGet]
+        public async Task<IActionResult> HoSo()
+        {
+            string? maBenhNhan = GetMaBenhNhanFromSession();
+            if (string.IsNullOrEmpty(maBenhNhan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            var benhNhan = await _context.BenhNhans
+                .Include(b => b.LichHens)
+                .FirstOrDefaultAsync(b => b.MaBenhNhan == maBenhNhan);
+
+            if (benhNhan == null)
+            {
+                return RedirectToAction(nameof(TaoHoSo));
+            }
+
+            // Thống kê lịch hẹn
+            ViewBag.TongLichHen = benhNhan.LichHens.Count;
+            ViewBag.LichChoXacNhan = benhNhan.LichHens.Count(l => l.TrangThai == "Chờ xác nhận");
+            ViewBag.LichHoanTat = benhNhan.LichHens.Count(l => l.TrangThai == "Hoàn tất");
+            ViewBag.LichDaHuy = benhNhan.LichHens.Count(l => l.TrangThai == "Đã hủy");
+
+            return View(benhNhan);
+        }
+
+        // 7.1: TẠO HỒ SƠ (GET)
+        [HttpGet]
+        public async Task<IActionResult> TaoHoSo()
+        {
+            string? maTaiKhoan = _currentUser.MaTaiKhoan;
+            if (string.IsNullOrEmpty(maTaiKhoan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            // Nếu đã có hồ sơ rồi thì chuyển sang xem
+            var daCoHoSo = await _context.BenhNhans.AnyAsync(b => b.MaTaiKhoan == maTaiKhoan);
+            if (daCoHoSo)
+            {
+                return RedirectToAction(nameof(HoSo));
+            }
+
+            // Pre-fill email từ TaiKhoan
+            var taiKhoan = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
+            var model = new HoSoBenhNhanViewModel
+            {
+                HoTen = taiKhoan?.HoTen ?? "",
+                Email = taiKhoan?.Email ?? ""
+            };
+
+            return View(model);
+        }
+
+        // 7.1: TẠO HỒ SƠ (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TaoHoSo(HoSoBenhNhanViewModel model)
+        {
+            string? maTaiKhoan = _currentUser.MaTaiKhoan;
+            if (string.IsNullOrEmpty(maTaiKhoan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            // Nếu đã có hồ sơ rồi thì chuyển sang xem
+            var daCoHoSo = await _context.BenhNhans.AnyAsync(b => b.MaTaiKhoan == maTaiKhoan);
+            if (daCoHoSo)
+            {
+                return RedirectToAction(nameof(HoSo));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Kiểm tra trùng số điện thoại
+            bool trungSDT = await _context.BenhNhans.AnyAsync(b => b.SoDienThoai == model.SoDienThoai);
+            if (trungSDT)
+            {
+                ModelState.AddModelError("SoDienThoai", "Số điện thoại đã được sử dụng bởi bệnh nhân khác.");
+                return View(model);
+            }
+
+            // Kiểm tra trùng email
+            bool trungEmail = await _context.BenhNhans.AnyAsync(b => b.Email == model.Email);
+            if (trungEmail)
+            {
+                ModelState.AddModelError("Email", "Email đã được sử dụng bởi bệnh nhân khác.");
+                return View(model);
+            }
+
+            // Tạo hồ sơ bệnh nhân mới
+            var benhNhan = new BenhNhan
+            {
+                MaBenhNhan = "BN_" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                MaTaiKhoan = maTaiKhoan,
+                HoTen = model.HoTen,
+                NgaySinh = model.NgaySinh,
+                GioiTinh = model.GioiTinh,
+                SoDienThoai = model.SoDienThoai,
+                Email = model.Email,
+                DiaChi = model.DiaChi,
+                TrangThai = 1
+            };
+
+            _context.BenhNhans.Add(benhNhan);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Tạo hồ sơ bệnh nhân thành công!";
+            return RedirectToAction(nameof(HoSo));
+        }
+
+        // 7.2: SỬA HỒ SƠ (GET)
+        [HttpGet]
+        public async Task<IActionResult> SuaHoSo()
+        {
+            string? maBenhNhan = GetMaBenhNhanFromSession();
+            if (string.IsNullOrEmpty(maBenhNhan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            var benhNhan = await _context.BenhNhans.FirstOrDefaultAsync(b => b.MaBenhNhan == maBenhNhan);
+            if (benhNhan == null)
+            {
+                return RedirectToAction(nameof(TaoHoSo));
+            }
+
+            var model = new HoSoBenhNhanViewModel
+            {
+                HoTen = benhNhan.HoTen,
+                NgaySinh = benhNhan.NgaySinh,
+                GioiTinh = benhNhan.GioiTinh,
+                SoDienThoai = benhNhan.SoDienThoai,
+                Email = benhNhan.Email,
+                DiaChi = benhNhan.DiaChi
+            };
+
+            return View(model);
+        }
+
+        // 7.2: SỬA HỒ SƠ (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SuaHoSo(HoSoBenhNhanViewModel model)
+        {
+            string? maBenhNhan = GetMaBenhNhanFromSession();
+            if (string.IsNullOrEmpty(maBenhNhan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            var benhNhan = await _context.BenhNhans.FirstOrDefaultAsync(b => b.MaBenhNhan == maBenhNhan);
+            if (benhNhan == null)
+            {
+                return RedirectToAction(nameof(TaoHoSo));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Kiểm tra trùng số điện thoại (trừ chính mình)
+            bool trungSDT = await _context.BenhNhans.AnyAsync(b => b.SoDienThoai == model.SoDienThoai && b.MaBenhNhan != maBenhNhan);
+            if (trungSDT)
+            {
+                ModelState.AddModelError("SoDienThoai", "Số điện thoại đã được sử dụng bởi bệnh nhân khác.");
+                return View(model);
+            }
+
+            // Kiểm tra trùng email (trừ chính mình)
+            bool trungEmail = await _context.BenhNhans.AnyAsync(b => b.Email == model.Email && b.MaBenhNhan != maBenhNhan);
+            if (trungEmail)
+            {
+                ModelState.AddModelError("Email", "Email đã được sử dụng bởi bệnh nhân khác.");
+                return View(model);
+            }
+
+            // Cập nhật thông tin
+            benhNhan.HoTen = model.HoTen;
+            benhNhan.NgaySinh = model.NgaySinh;
+            benhNhan.GioiTinh = model.GioiTinh;
+            benhNhan.SoDienThoai = model.SoDienThoai;
+            benhNhan.Email = model.Email;
+            benhNhan.DiaChi = model.DiaChi;
+
+            _context.Update(benhNhan);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Cập nhật hồ sơ thành công!";
+            return RedirectToAction(nameof(HoSo));
         }
     }
 }

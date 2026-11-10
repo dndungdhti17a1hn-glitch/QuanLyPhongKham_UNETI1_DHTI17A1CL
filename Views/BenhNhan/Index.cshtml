@@ -1,77 +1,213 @@
 @model IEnumerable<QuanLyPhongKham.Models.LichHen>
 
 @{
-    ViewData["Title"] = "Lịch sử khám bệnh";
+    ViewData["Title"] = "Lịch hẹn khám bệnh";
+    var benhNhan = ViewBag.BenhNhan as QuanLyPhongKham.Models.BenhNhan;
 }
 
-<div class="container mt-4">
-    <h2>Lịch sử khám bệnh và Lịch hẹn của bạn</h2>
-    <hr />
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-    }
+<!-- Toast Thông báo -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="toast-success" class="fixed top-20 right-5 z-50 animate-slide-in">
+        <div class="bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-2xl"></i>
+            <div>
+                <p class="font-semibold">Thành công!</p>
+                <p class="text-sm opacity-90">@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => document.getElementById('toast-success')?.remove(), 5000);
+    </script>
+}
 
-    <p>
-        <a asp-action="DatLich" class="btn btn-primary">➕ Đặt lịch khám mới</a>
-    </p>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="toast-error" class="fixed top-20 right-5 z-50 animate-slide-in">
+        <div class="bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <i class="fa-solid fa-circle-exclamation text-2xl"></i>
+            <div>
+                <p class="font-semibold">Lỗi!</p>
+                <p class="text-sm opacity-90">@TempData["ErrorMessage"]</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => document.getElementById('toast-error')?.remove(), 5000);
+    </script>
+}
 
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Mã lịch hẹn</th>
-                <th>Ngày khám</th>
-                <th>Giờ khám</th>
-                <th>Bác sĩ</th>
-                <th>Phòng khám</th>
-                <th>Lý do khám</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model) {
-                <tr>
-                    <td>@item.MaLichHen</td>
-                    <td>@item.NgayKham.ToString("dd/MM/yyyy")</td>
-                    <td>@item.GioKham</td>
-                    <td>@item.BacSi?.HoTen</td>
-                    <td>@item.PhongKham?.TenPhong</td>
-                    <td>@item.LyDoKham</td>
-                    <td>
-                        @if (item.TrangThai == "Chờ xác nhận")
-                        {
-                            <span class="badge bg-warning text-dark">@item.TrangThai</span>
-                        }
-                        else if (item.TrangThai == "Đã xác nhận" || item.TrangThai == "Đã tiếp nhận")
-                        {
-                            <span class="badge bg-info text-dark">@item.TrangThai</span>
-                        }
-                        else if (item.TrangThai == "Hoàn tất")
-                        {
-                            <span class="badge bg-success">@item.TrangThai</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">@item.TrangThai</span>
-                        }
-                    </td>
-                    <td>
-                        @if (item.TrangThai == "Chờ xác nhận")
-                        {
-                            <form asp-action="HuyLich" asp-route-id="@item.MaLichHen" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-danger">Hủy lịch</button>
-                            </form>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header với thông tin bệnh nhân -->
+        @if (benhNhan != null)
+        {
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                            @(benhNhan.HoTen.Substring(0, 1).ToUpper())
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">@benhNhan.HoTen</h3>
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600 mt-1">
+                                <span><i class="fa-solid fa-id-card mr-1.5 text-teal-600"></i>@benhNhan.MaBenhNhan</span>
+                                <span><i class="fa-solid fa-phone mr-1.5 text-teal-600"></i>@benhNhan.SoDienThoai</span>
+                                <span><i class="fa-solid fa-envelope mr-1.5 text-teal-600"></i>@benhNhan.Email</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a asp-action="HoSo" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-100 font-semibold transition">
+                        <i class="fa-solid fa-user-circle mr-2"></i>Xem hồ sơ
+                    </a>
+                </div>
+            </div>
+        }
+
+        <!-- Title & Action -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">📋 Lịch Hẹn Của Tôi</h1>
+                <p class="text-slate-600 mt-1">Quản lý và theo dõi lịch khám bệnh của bạn</p>
+            </div>
+            <a asp-action="DatLich" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-lg shadow-teal-500/30 transition transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-calendar-plus mr-2"></i>Đặt lịch mới
+            </a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <!-- Empty State -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
+                <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center">
+                    <i class="fa-regular fa-calendar-xmark text-5xl text-slate-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Chưa có lịch hẹn nào</h3>
+                <p class="text-slate-600 mb-6 max-w-md mx-auto">Hãy đặt lịch khám để được chăm sóc sức khỏe tốt nhất từ đội ngũ bác sĩ chuyên khoa của chúng tôi.</p>
+                <a asp-action="DatLich" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-lg shadow-teal-500/30 transition">
+                    <i class="fa-solid fa-calendar-plus mr-2"></i>Đặt lịch ngay
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Danh sách lịch hẹn -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Mã Lịch Hẹn</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Ngày Khám</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Giờ</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Bác Sĩ</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Phòng Khám</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Lý Do</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Trạng Thái</th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs font-mono text-slate-500">@item.MaLichHen</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="font-semibold text-slate-900">@item.NgayKham.ToString("dd/MM/yyyy")</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-teal-600 font-semibold">@item.GioKham.ToString(@"hh\:mm")</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-slate-700">@(item.BacSi?.HoTen ?? "—")</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-slate-700 text-sm">@(item.PhongKham?.TenPhong ?? "—")</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-slate-600 text-sm">@(item.LyDoKham?.Length > 30 ? item.LyDoKham.Substring(0, 30) + "..." : item.LyDoKham ?? "—")</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @switch (item.TrangThai)
+                                        {
+                                            case "Chờ xác nhận":
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                                    <i class="fa-solid fa-clock mr-1.5"></i>Chờ xác nhận
+                                                </span>
+                                                break;
+                                            case "Đã xác nhận":
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                                    <i class="fa-solid fa-check-circle mr-1.5"></i>Đã xác nhận
+                                                </span>
+                                                break;
+                                            case "Đã tiếp nhận":
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                                                    <i class="fa-solid fa-user-doctor mr-1.5"></i>Đã tiếp nhận
+                                                </span>
+                                                break;
+                                            case "Hoàn tất":
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                                    <i class="fa-solid fa-circle-check mr-1.5"></i>Hoàn tất
+                                                </span>
+                                                break;
+                                            case "Đã hủy":
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                                    <i class="fa-solid fa-ban mr-1.5"></i>Đã hủy
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
+                                                    @item.TrangThai
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        @if (item.TrangThai == "Chờ xác nhận")
+                                        {
+                                            <form asp-action="HuyLich" asp-route-id="@item.MaLichHen" method="post" class="inline"
+                                                  onsubmit="return confirm('Bạn có chắc muốn hủy lịch hẹn này không?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-xs transition">
+                                                    <i class="fa-solid fa-ban mr-1.5"></i>Hủy lịch
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-slate-400 text-sm">—</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
 </div>
+
+<style>
+    @@keyframes slide-in {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    .animate-slide-in {
+        animation: slide-in 0.3s ease-out;
+    }
+</style>

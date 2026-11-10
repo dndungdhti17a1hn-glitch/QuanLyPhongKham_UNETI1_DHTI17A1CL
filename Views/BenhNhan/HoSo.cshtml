@@ -1,0 +1,214 @@
+@model QuanLyPhongKham.Models.BenhNhan
+
+@{
+    ViewData["Title"] = "Hồ sơ bệnh nhân";
+}
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Toast Thông báo -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="toast-success" class="fixed top-20 right-5 z-50 animate-slide-in">
+        <div class="bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-2xl"></i>
+            <div>
+                <p class="font-semibold">Thành công!</p>
+                <p class="text-sm opacity-90">@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => document.getElementById('toast-success')?.remove(), 5000);
+    </script>
+}
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Back button -->
+        <a asp-action="Index" class="inline-flex items-center text-teal-600 hover:text-teal-700 font-semibold mb-6 transition">
+            <i class="fa-solid fa-arrow-left mr-2"></i>Quay lại danh sách lịch hẹn
+        </a>
+
+        <!-- Gradient Header Card -->
+        <div class="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl shadow-xl p-8 mb-6 text-white">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div class="flex items-center space-x-5">
+                    <div class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-4xl font-bold flex-shrink-0">
+                        @(Model.HoTen.Substring(0, 1).ToUpper())
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">@Model.HoTen</h2>
+                        <p class="text-white/80 text-sm mt-1">
+                            <i class="fa-solid fa-id-card mr-1.5"></i>@Model.MaBenhNhan
+                        </p>
+                        <div class="flex flex-wrap gap-3 mt-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-semibold">
+                                <i class="fa-solid fa-phone mr-1.5"></i>@Model.SoDienThoai
+                            </span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-semibold">
+                                <i class="fa-solid fa-envelope mr-1.5"></i>@Model.Email
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <a asp-action="SuaHoSo" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-white text-teal-700 hover:bg-teal-50 font-semibold shadow-lg transition">
+                    <i class="fa-solid fa-pen-to-square mr-2"></i>Chỉnh sửa hồ sơ
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm font-medium">Tổng lịch hẹn</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">@ViewBag.TongLichHen</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl text-blue-500">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm font-medium">Chờ xác nhận</p>
+                        <p class="text-2xl font-bold text-amber-600 mt-1">@ViewBag.LichChoXacNhan</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-2xl text-amber-500">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm font-medium">Hoàn tất</p>
+                        <p class="text-2xl font-bold text-emerald-600 mt-1">@ViewBag.LichHoanTat</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-2xl text-emerald-500">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm font-medium">Đã hủy</p>
+                        <p class="text-2xl font-bold text-red-500 mt-1">@ViewBag.LichDaHuy</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-2xl text-red-500">
+                        <i class="fa-solid fa-ban"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin chi tiết -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center">
+                <i class="fa-solid fa-circle-info text-teal-600 mr-2"></i>Thông tin chi tiết
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Họ tên -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Họ và tên</p>
+                        <p class="text-slate-900 font-semibold mt-0.5">@Model.HoTen</p>
+                    </div>
+                </div>
+                <!-- Ngày sinh -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Ngày sinh</p>
+                        <p class="text-slate-900 font-semibold mt-0.5">
+                            @(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "—")
+                        </p>
+                    </div>
+                </div>
+                <!-- Giới tính -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+                        <i class="fa-solid fa-venus-mars"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Giới tính</p>
+                        <p class="text-slate-900 font-semibold mt-0.5">@(Model.GioiTinh ?? "—")</p>
+                    </div>
+                </div>
+                <!-- Số điện thoại -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Số điện thoại</p>
+                        <p class="text-slate-900 font-semibold mt-0.5">@Model.SoDienThoai</p>
+                    </div>
+                </div>
+                <!-- Email -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Email</p>
+                        <p class="text-slate-900 font-semibold mt-0.5 break-all">@Model.Email</p>
+                    </div>
+                </div>
+                <!-- Địa chỉ -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Địa chỉ</p>
+                        <p class="text-slate-900 font-semibold mt-0.5">@(Model.DiaChi ?? "—")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trạng thái tài khoản -->
+            <div class="mt-6 pt-6 border-t border-slate-100">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-slate-600 font-medium">Trạng thái tài khoản:</span>
+                        @if (Model.TrangThai == 1)
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                <i class="fa-solid fa-circle-check mr-1.5"></i>Đang hoạt động
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                <i class="fa-solid fa-lock mr-1.5"></i>Đã khóa
+                            </span>
+                        }
+                    </div>
+                    <a asp-action="SuaHoSo" class="inline-flex items-center px-4 py-2 rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-100 font-semibold transition">
+                        <i class="fa-solid fa-pen-to-square mr-2"></i>Chỉnh sửa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@keyframes slide-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .animate-slide-in { animation: slide-in 0.3s ease-out; }
+</style>
