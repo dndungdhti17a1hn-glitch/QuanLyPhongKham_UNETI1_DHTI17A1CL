@@ -10,7 +10,6 @@ using QuanLyPhongKham.Models.ViewModels;
 
 namespace QuanLyPhongKham.Controllers
 {
-    [AdminOnly]
     public class DichVuKhamController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,18 +19,21 @@ namespace QuanLyPhongKham.Controllers
             _context = context;
         }
 
-        // GET: DichVuKham
-        public async Task<IActionResult> Index(string searchString, string sortOrder, int? pageNumber)
+        // 16.1: Tra cứu bảng giá Dịch vụ khám dành cho Bệnh nhân / Người dùng
+        [HttpGet]
+        public async Task<IActionResult> TraCuu(string searchString, string sortOrder, int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["PriceSortParm"] = sortOrder == "price_asc" ? "price_desc" : "price_asc";
             ViewData["CurrentFilter"] = searchString;
 
-            var query = _context.DichVuKhams.AsQueryable();
+            var query = _context.DichVuKhams.Where(d => d.TrangThai == 1).AsQueryable();
 
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
-                query = query.Where(c => c.TenDichVu.Contains(searchString));
+                var keyword = searchString.Trim();
+                query = query.Where(c => c.TenDichVu.Contains(keyword) || c.MoTa.Contains(keyword));
             }
 
             switch (sortOrder)
@@ -39,11 +41,77 @@ namespace QuanLyPhongKham.Controllers
                 case "name_desc":
                     query = query.OrderByDescending(c => c.TenDichVu);
                     break;
+                case "price_asc":
+                    query = query.OrderBy(c => c.GiaTien);
+                    break;
+                case "price_desc":
+                    query = query.OrderByDescending(c => c.GiaTien);
+                    break;
                 default:
                     query = query.OrderBy(c => c.TenDichVu);
                     break;
             }
 
+            int pageSize = 6;
+            int pageIndex = pageNumber ?? 1;
+            if (pageIndex < 1) pageIndex = 1;
+
+            int totalRecords = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            if (pageIndex > totalPages && totalPages > 0) pageIndex = totalPages;
+
+            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            ViewData["TotalPages"] = totalPages;
+            ViewData["PageIndex"] = pageIndex;
+            ViewData["TotalRecords"] = totalRecords;
+
+            return View(items);
+        }
+
+        // GET: DichVuKham (Quản trị dành cho Admin: Tìm kiếm + Lọc + Sắp xếp + Phân trang)
+        [AdminOnly]
+        public async Task<IActionResult> Index(string searchString, int? trangThaiFilter, string sortOrder, int? pageNumber)
+        {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["PriceSortParm"] = sortOrder == "price_asc" ? "price_desc" : "price_asc";
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["TrangThaiFilter"] = trangThaiFilter;
+
+            var query = _context.DichVuKhams.AsQueryable();
+
+            // 1. Tìm kiếm
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {
+                var keyword = searchString.Trim();
+                query = query.Where(c => c.TenDichVu.Contains(keyword) || c.MaDichVu.Contains(keyword));
+            }
+
+            // 2. Lọc theo trạng thái
+            if (trangThaiFilter.HasValue)
+            {
+                query = query.Where(c => c.TrangThai == trangThaiFilter.Value);
+            }
+
+            // 3. Sắp xếp
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(c => c.TenDichVu);
+                    break;
+                case "price_asc":
+                    query = query.OrderBy(c => c.GiaTien);
+                    break;
+                case "price_desc":
+                    query = query.OrderByDescending(c => c.GiaTien);
+                    break;
+                default:
+                    query = query.OrderBy(c => c.TenDichVu);
+                    break;
+            }
+
+            // 4. Phân trang bằng EF Core / LINQ
             int pageSize = 5;
             int pageIndex = pageNumber ?? 1;
             if (pageIndex < 1) pageIndex = 1;
@@ -56,11 +124,13 @@ namespace QuanLyPhongKham.Controllers
 
             ViewData["TotalPages"] = totalPages;
             ViewData["PageIndex"] = pageIndex;
+            ViewData["TotalRecords"] = totalRecords;
 
             return View(items);
         }
 
         // GET: DichVuKham/Details/5
+        [AdminOnly]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null) return NotFound();
@@ -72,12 +142,14 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // GET: DichVuKham/Create
+        [AdminOnly]
         public IActionResult Create()
         {
             return View(new DichVuKhamCreateViewModel());
         }
 
         // POST: DichVuKham/Create
+        [AdminOnly]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DichVuKhamCreateViewModel model)
@@ -94,6 +166,7 @@ namespace QuanLyPhongKham.Controllers
 
             if (ModelState.IsValid)
             {
+                model.MaDichVu = model.MaDichVu.Trim();
                 model.TenDichVu = model.TenDichVu.Trim();
                 
                 // Validate duplicate code
@@ -138,6 +211,7 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // GET: DichVuKham/Edit/5
+        [AdminOnly]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null) return NotFound();
@@ -157,6 +231,7 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // POST: DichVuKham/Edit/5
+        [AdminOnly]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, DichVuKhamEditViewModel model)
@@ -210,6 +285,7 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // GET: DichVuKham/Delete/5
+        [AdminOnly]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null) return NotFound();
@@ -221,6 +297,7 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // POST: DichVuKham/Delete/5
+        [AdminOnly]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
