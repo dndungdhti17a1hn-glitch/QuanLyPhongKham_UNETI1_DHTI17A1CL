@@ -42,6 +42,14 @@ namespace QuanLyPhongKham.Filters
                         hasRole = true;
                         break;
                     }
+                    // Hỗ trợ tương thích cả hai giá trị "Patient" và "Bệnh nhân" trong CSDL
+                    if ((role == "Patient" || role == "Bệnh nhân") &&
+                        (string.Equals(currentUser.VaiTro, "Patient", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(currentUser.VaiTro, "Bệnh nhân", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        hasRole = true;
+                        break;
+                    }
                 }
 
                 if (!hasRole)
