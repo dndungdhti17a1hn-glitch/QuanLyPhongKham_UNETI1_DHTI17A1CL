@@ -10,7 +10,6 @@ using QuanLyPhongKham.Models.ViewModels;
 
 namespace QuanLyPhongKham.Controllers
 {
-    [AdminOnly]
     public class ChuyenKhoaController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,18 +19,21 @@ namespace QuanLyPhongKham.Controllers
             _context = context;
         }
 
-        // GET: ChuyenKhoa
-        public async Task<IActionResult> Index(string searchString, string sortOrder, int? pageNumber)
+        // 16.1: Tra cứu danh sách Chuyên khoa dành cho Bệnh nhân / Người dùng
+        [HttpGet]
+        public async Task<IActionResult> TraCuu(string searchString, string sortOrder, int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["CurrentFilter"] = searchString;
 
-            var query = _context.ChuyenKhoas.AsQueryable();
+            // Chỉ hiển thị các chuyên khoa đang hoạt động cho bệnh nhân tra cứu
+            var query = _context.ChuyenKhoas.Where(c => c.TrangThai == 1).AsQueryable();
 
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
-                query = query.Where(c => c.TenChuyenKhoa.Contains(searchString));
+                var keyword = searchString.Trim();
+                query = query.Where(c => c.TenChuyenKhoa.Contains(keyword) || c.MoTa.Contains(keyword));
             }
 
             switch (sortOrder)
@@ -44,6 +46,66 @@ namespace QuanLyPhongKham.Controllers
                     break;
             }
 
+            int pageSize = 6;
+            int pageIndex = pageNumber ?? 1;
+            if (pageIndex < 1) pageIndex = 1;
+
+            int totalRecords = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            if (pageIndex > totalPages && totalPages > 0) pageIndex = totalPages;
+
+            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            ViewData["TotalPages"] = totalPages;
+            ViewData["PageIndex"] = pageIndex;
+            ViewData["TotalRecords"] = totalRecords;
+
+            return View(items);
+        }
+
+        // GET: ChuyenKhoa (Quản trị dành cho Admin: Tìm kiếm + Lọc + Sắp xếp + Phân trang)
+        [AdminOnly]
+        public async Task<IActionResult> Index(string searchString, int? trangThaiFilter, string sortOrder, int? pageNumber)
+        {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CodeSortParm"] = sortOrder == "code_asc" ? "code_desc" : "code_asc";
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["TrangThaiFilter"] = trangThaiFilter;
+
+            var query = _context.ChuyenKhoas.AsQueryable();
+
+            // 1. Tìm kiếm
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {
+                var keyword = searchString.Trim();
+                query = query.Where(c => c.TenChuyenKhoa.Contains(keyword) || c.MaChuyenKhoa.Contains(keyword));
+            }
+
+            // 2. Lọc theo trạng thái
+            if (trangThaiFilter.HasValue)
+            {
+                query = query.Where(c => c.TrangThai == trangThaiFilter.Value);
+            }
+
+            // 3. Sắp xếp
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(c => c.TenChuyenKhoa);
+                    break;
+                case "code_asc":
+                    query = query.OrderBy(c => c.MaChuyenKhoa);
+                    break;
+                case "code_desc":
+                    query = query.OrderByDescending(c => c.MaChuyenKhoa);
+                    break;
+                default:
+                    query = query.OrderBy(c => c.TenChuyenKhoa);
+                    break;
+            }
+
+            // 4. Phân trang bằng EF Core / LINQ
             int pageSize = 5;
             int pageIndex = pageNumber ?? 1;
             if (pageIndex < 1) pageIndex = 1;
@@ -56,11 +118,13 @@ namespace QuanLyPhongKham.Controllers
 
             ViewData["TotalPages"] = totalPages;
             ViewData["PageIndex"] = pageIndex;
+            ViewData["TotalRecords"] = totalRecords;
 
             return View(items);
         }
 
         // GET: ChuyenKhoa/Details/5
+        [AdminOnly]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null) return NotFound();
@@ -72,12 +136,14 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // GET: ChuyenKhoa/Create
+        [AdminOnly]
         public IActionResult Create()
         {
             return View(new ChuyenKhoaCreateViewModel());
         }
 
         // POST: ChuyenKhoa/Create
+        [AdminOnly]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ChuyenKhoaCreateViewModel model)
@@ -89,6 +155,7 @@ namespace QuanLyPhongKham.Controllers
 
             if (ModelState.IsValid)
             {
+                model.MaChuyenKhoa = model.MaChuyenKhoa.Trim();
                 model.TenChuyenKhoa = model.TenChuyenKhoa.Trim();
                 
                 // Validate duplicate code
@@ -132,6 +199,7 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // GET: ChuyenKhoa/Edit/5
+        [AdminOnly]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null) return NotFound();
@@ -150,6 +218,7 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // POST: ChuyenKhoa/Edit/5
+        [AdminOnly]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, ChuyenKhoaEditViewModel model)
@@ -197,6 +266,7 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // GET: ChuyenKhoa/Delete/5
+        [AdminOnly]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null) return NotFound();
@@ -208,17 +278,13 @@ namespace QuanLyPhongKham.Controllers
         }
 
         // POST: ChuyenKhoa/Delete/5
+        [AdminOnly]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var chuyenKhoa = await _context.ChuyenKhoas.FindAsync(id);
             if (chuyenKhoa == null) return RedirectToAction(nameof(Index));
-
-            // Hiện tại schema chưa có constraint FK cứng tới BacSi hoặc PhongKham. 
-            // Nếu sau này nhóm thêm quan hệ, ta có thể check constraint ở đây:
-            // bool isReferenced = await _context.BacSis.AnyAsync(b => b.MaChuyenKhoa == id);
-            // if (isReferenced) { TempData["ErrorMessage"] = "Không thể xóa chuyên khoa đang có bác sĩ."; return RedirectToAction(nameof(Index)); }
 
             try
             {
@@ -228,7 +294,7 @@ namespace QuanLyPhongKham.Controllers
             }
             catch (DbUpdateException)
             {
-                TempData["ErrorMessage"] = "Lỗi khi xóa: Dữ liệu đang được tham chiếu ở bảng khác.";
+                TempData["ErrorMessage"] = "Lỗi khi xóa: Chuyên khoa này đang được tham chiếu ở bác sĩ hoặc phòng khám.";
             }
             return RedirectToAction(nameof(Index));
         }
