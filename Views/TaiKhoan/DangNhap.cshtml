@@ -1,57 +1,389 @@
 @model QuanLyPhongKham.Models.ViewModels.DangNhapViewModel
 @{
-    ViewData["Title"] = "Đăng nhập";
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập - Phòng Khám Đa Khoa UN1";
 }
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <h2 class="text-center mb-4">Đăng nhập hệ thống</h2>
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success">
-                @TempData["SuccessMessage"]
-            </div>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
         }
-
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger">
-                @TempData["ErrorMessage"]
-            </div>
+    </script>
+    <style>
+        .card-enter {
+            animation: fadeUp 0.35s ease-out forwards;
         }
-
-        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
-        {
-            <div class="alert alert-danger">
-                @ViewData.ModelState[string.Empty]?.Errors[0].ErrorMessage
-            </div>
+        @@keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        .field-validation-error {
+            display: block;
+            margin-top: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #dc2626;
+        }
+        .input-validation-error {
+            border-color: #f87171 !important;
+            background-color: #fef2f2 !important;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 bg-slate-50 antialiased selection:bg-medical-500 selection:text-white min-h-screen flex flex-col">
 
-        <form asp-action="DangNhap" method="post">
-            <div class="form-group mb-3">
-                <label asp-for="TenDangNhap" class="control-label"></label>
-                <input asp-for="TenDangNhap" class="form-control" />
-                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+    <!-- Thông báo Toast -->
+    <div id="toast" class="fixed top-20 right-5 z-50 hidden transform transition-all duration-300">
+        <div class="bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 border-l-4 border-medical-500">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-medical-500 text-xl"></i>
+            <div>
+                <h4 id="toast-title" class="font-semibold text-sm">Thông báo</h4>
+                <p id="toast-message" class="text-xs text-slate-300 mt-0.5"></p>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="MatKhau" class="control-label"></label>
-                <input asp-for="MatKhau" class="form-control" />
-                <span asp-validation-for="MatKhau" class="text-danger"></span>
-            </div>
-
-            <div class="form-group d-grid mb-3">
-                <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
-            </div>
-            
-            <div class="text-center">
-                <a asp-action="DangKy" asp-controller="TaiKhoan">Chưa có tài khoản? Đăng ký</a>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    <!-- Thanh Điều Hướng (Navbar đồng bộ với Trang chủ) -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a href="@Url.Action("Index", "Home", new { view = "landing" })" class="flex items-center space-x-3 group">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-medical-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-medical-500/20 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-staff-snake text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold bg-gradient-to-r from-medical-800 to-cyan-700 bg-clip-text text-transparent block leading-none">UN1</span>
+                        <span class="text-xs text-slate-500 font-medium tracking-wider">CLINIC & HEALTHCARE</span>
+                    </div>
+                </a>
+
+                <!-- Menu Desktop -->
+                <nav class="hidden md:flex space-x-8 font-medium text-sm text-slate-600">
+                    <a href="@Url.Action("Index", "Home", new { view = "landing" })" class="hover:text-medical-600 transition py-2">Trang chủ</a>
+                    <a href="@Url.Action("Index", "Home", new { view = "landing" })#about" class="hover:text-medical-600 transition py-2">Về chúng tôi</a>
+                    <a href="@Url.Action("TraCuu", "ChuyenKhoa")" class="hover:text-medical-600 transition py-2">Chuyên khoa</a>
+                    <a href="@Url.Action("TraCuu", "DichVuKham")" class="hover:text-medical-600 transition py-2">Bảng giá dịch vụ</a>
+                    <a href="@Url.Action("Index", "Home", new { view = "landing" })#doctors" class="hover:text-medical-600 transition py-2">Đội ngũ Bác sĩ</a>
+                </nav>
+
+                <!-- Cụm nút Điều hướng nhanh -->
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="@Url.Action("Index", "Home", new { view = "landing" })" class="px-4 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:text-medical-700 hover:bg-slate-100 transition">
+                        <i class="fa-solid fa-arrow-left mr-1.5 text-xs"></i>Về trang chủ
+                    </a>
+                    <a href="@Url.Action("DangKy", "TaiKhoan")" class="px-5 py-2.5 rounded-xl font-semibold text-sm bg-medical-600 hover:bg-medical-700 text-white shadow-md shadow-medical-500/20 transition transform hover:-translate-y-0.5">
+                        Đăng ký ngay
+                    </a>
+                </div>
+
+                <!-- Nút Menu Mobile -->
+                <div class="md:hidden flex items-center">
+                    <a href="@Url.Action("Index", "Home", new { view = "landing" })" class="text-slate-600 hover:text-medical-600 px-3 py-2 rounded-lg text-sm font-medium">
+                        <i class="fa-solid fa-house mr-1"></i>Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Phần Nội Dung Chính -->
+    <main class="flex-grow relative overflow-hidden bg-gradient-to-b from-medical-50/70 via-white to-slate-50 py-10 lg:py-16 flex items-center">
+        <!-- Họa tiết trang trí nền -->
+        <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-medical-100/50 blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-cyan-100/50 blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+                <!-- Cột Trái: Thông điệp & Tiện ích Phòng khám (Ẩn hoặc thu gọn trên mobile) -->
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center space-x-2 bg-medical-100/80 text-medical-800 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-medical-600 animate-ping"></span>
+                        <span>CỔNG THÔNG TIN BỆNH NHÂN & QUẢN TRỊ UN1</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                        Chào Mừng Bạn Quay Lại <br class="hidden sm:inline" />
+                        <span class="bg-gradient-to-r from-medical-600 to-cyan-600 bg-clip-text text-transparent">Phòng Khám Đa Khoa UN1</span>
+                    </h1>
+
+                    <p class="text-base text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                        Đăng nhập vào hệ thống để đặt lịch khám ưu tiên, theo dõi lịch sử khám chữa bệnh, quản lý hồ sơ y tế điện tử bảo mật và nhận tư vấn từ đội ngũ chuyên gia đầu ngành.
+                    </p>
+
+                    <!-- Danh sách tiện ích nổi bật -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 max-w-xl mx-auto lg:mx-0 text-left">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-start space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-medical-50 text-medical-600 flex items-center justify-center flex-shrink-0 text-lg">
+                                <i class="fa-regular fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Đặt lịch nhanh chóng</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Chủ động chọn bác sĩ & khung giờ khám phù hợp.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-start space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center flex-shrink-0 text-lg">
+                                <i class="fa-solid fa-notes-medical"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Hồ sơ bệnh án điện tử</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Lưu trữ & tra cứu lịch sử khám mọi lúc mọi nơi.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-start space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 text-lg">
+                                <i class="fa-solid fa-shield-heart"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Bảo mật tuyệt đối</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Thông tin cá nhân & y tế được mã hóa an toàn.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-start space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0 text-lg">
+                                <i class="fa-solid fa-phone-volume"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Hỗ trợ 24/7: 1900 888 999</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Luôn sẵn sàng giải đáp và hỗ trợ khẩn cấp.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chỉ số uy tín -->
+                    <div class="pt-6 grid grid-cols-3 gap-4 border-t border-slate-200/80 max-w-lg mx-auto lg:mx-0">
+                        <div>
+                            <p class="text-2xl font-bold text-slate-900">15+</p>
+                            <p class="text-xs text-slate-500">Năm kinh nghiệm</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-slate-900">50+</p>
+                            <p class="text-xs text-slate-500">Bác sĩ chuyên khoa</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-slate-900">99%</p>
+                            <p class="text-xs text-slate-500">Khách hàng hài lòng</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột Phải: Card Form Đăng Nhập -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden card-enter max-w-md mx-auto">
+
+                        <!-- Header Card & Chuyển đổi Tab -->
+                        <div class="p-6 sm:p-8 pb-0">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center space-x-2.5">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-medical-600 to-cyan-500 text-white flex items-center justify-center shadow-md shadow-medical-500/20">
+                                        <i class="fa-solid fa-right-to-bracket"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="font-bold text-lg text-slate-900 leading-tight">Đăng Nhập Hệ Thống</h2>
+                                        <p class="text-xs text-slate-500">Cổng Bệnh Nhân & Nhân Viên Y Tế</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Thanh chuyển Tab Đăng nhập / Đăng ký -->
+                            <div class="grid grid-cols-2 bg-slate-100 p-1.5 rounded-xl mb-6">
+                                <a href="@Url.Action("DangNhap", "TaiKhoan")" class="py-2.5 text-sm font-bold rounded-lg transition bg-white text-medical-700 shadow-sm text-center">
+                                    Đăng nhập
+                                </a>
+                                <a href="@Url.Action("DangKy", "TaiKhoan")" class="py-2.5 text-sm font-bold rounded-lg transition text-slate-600 hover:text-slate-900 text-center">
+                                    Đăng ký
+                                </a>
+                            </div>
+
+                            <!-- Hiển thị Thông báo Thành công / Lỗi -->
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start space-x-3 text-emerald-800 text-sm">
+                                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                                    <span>@TempData["SuccessMessage"]</span>
+                                </div>
+                            }
+
+                            @if (TempData["ErrorMessage"] != null)
+                            {
+                                <div class="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start space-x-3 text-red-700 text-sm">
+                                    <i class="fa-solid fa-circle-exclamation text-red-600 mt-0.5"></i>
+                                    <span>@TempData["ErrorMessage"]</span>
+                                </div>
+                            }
+
+                            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                            {
+                                <div class="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start space-x-3 text-red-700 text-sm">
+                                    <i class="fa-solid fa-triangle-exclamation text-red-600 mt-0.5"></i>
+                                    <span>@ViewData.ModelState[string.Empty]?.Errors[0].ErrorMessage</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Form Đăng Nhập -->
+                        <form asp-action="DangNhap" asp-controller="TaiKhoan" method="post" class="px-6 sm:px-8 pb-8 space-y-4">
+                            @Html.AntiForgeryToken()
+
+                            <div>
+                                <label asp-for="TenDangNhap" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    Tên đăng nhập <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <i class="fa-regular fa-user absolute left-3.5 top-3.5 text-slate-400"></i>
+                                    <input asp-for="TenDangNhap" placeholder="Nhập tên đăng nhập của bạn" autocomplete="username"
+                                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition" />
+                                </div>
+                                <span asp-validation-for="TenDangNhap"></span>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <label asp-for="MatKhau" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                                        Mật khẩu <span class="text-red-500">*</span>
+                                    </label>
+                                    <a href="javascript:void(0)" onclick="showToast('Vui lòng liên hệ tổng đài 1900 888 999 để được hỗ trợ cấp lại mật khẩu!', 'Khôi phục mật khẩu')" class="text-xs text-medical-600 hover:underline font-medium">
+                                        Quên mật khẩu?
+                                    </a>
+                                </div>
+                                <div class="relative">
+                                    <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400"></i>
+                                    <input asp-for="MatKhau" id="password-input" placeholder="••••••••" autocomplete="current-password"
+                                           class="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-200 focus:border-medical-500 focus:ring-2 focus:ring-medical-500/20 outline-none text-sm transition" />
+                                    <button type="button" onclick="togglePassword('password-input', 'eye-icon')" tabindex="-1"
+                                            class="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 focus:outline-none">
+                                        <i id="eye-icon" class="fa-regular fa-eye"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="MatKhau"></span>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-1">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="rounded text-medical-600 focus:ring-medical-500 border-slate-300" />
+                                    <span class="text-xs text-slate-600">Ghi nhớ đăng nhập trên thiết bị này</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 rounded-xl bg-medical-600 hover:bg-medical-700 text-white font-bold text-sm shadow-lg shadow-medical-500/25 flex items-center justify-center space-x-2 transition transform hover:-translate-y-0.5 mt-2">
+                                <span>Đăng Nhập Ngay</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+
+                            <div class="pt-4 border-t border-slate-100 text-center space-y-2">
+                                <p class="text-xs text-slate-500">
+                                    Chưa có hồ sơ bệnh nhân?
+                                    <a asp-action="DangKy" asp-controller="TaiKhoan" class="text-medical-600 font-bold hover:underline ml-1">
+                                        Đăng ký tài khoản mới
+                                    </a>
+                                </p>
+                                <p class="text-xs text-slate-400">
+                                    <a href="@Url.Action("Index", "Home", new { view = "landing" })" class="hover:text-medical-600 transition inline-flex items-center">
+                                        <i class="fa-solid fa-house mr-1 text-[10px]"></i>Quay về trang chủ UN1
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Chân Trang rút gọn đồng bộ -->
+    <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-medical-500 flex items-center justify-center text-white">
+                    <i class="fa-solid fa-staff-snake text-xs"></i>
+                </div>
+                <span class="font-bold text-white">PHÒNG KHÁM ĐA KHOA UN1</span>
+                <span class="text-slate-600">|</span>
+                <span>&copy; 2026 Bảo lưu mọi quyền.</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <span><i class="fa-solid fa-location-dot text-medical-500 mr-1.5"></i>128 Nguyễn Trãi, Thanh Xuân, Hà Nội</span>
+                <span><i class="fa-solid fa-phone text-medical-500 mr-1.5"></i>Hotline: <strong class="text-white">1900 888 999</strong></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        let toastTimeout;
+        function showToast(message, title = 'Thông báo', isError = false) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+            if (!toast || !toastTitle || !toastMessage || !toastIcon) return;
+
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            toastIcon.className = isError
+                ? "fa-solid fa-triangle-exclamation text-amber-400 text-xl"
+                : "fa-solid fa-circle-check text-medical-500 text-xl";
+
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

@@ -17,72 +17,67 @@ namespace QuanLyPhongKham.Data
             await context.Database.MigrateAsync();
 
             // 1. Seed Tài khoản (02 Admin + các tài khoản Bệnh nhân hoạt động & bị khóa để kiểm thử mục 5.6)
-            if (!await context.TaiKhoans.AnyAsync())
+            var seedAccounts = new List<(TaiKhoan Account, string PlainPassword)>
             {
-                var accounts = new List<TaiKhoan>
+                (new TaiKhoan
                 {
-                    new TaiKhoan
-                    {
-                        MaTaiKhoan = "TK_ADMIN01",
-                        TenDangNhap = "admin",
-                        HoTen = "Quản Trị Viên Hệ Thống",
-                        Email = "admin@phongkhamun1.vn",
-                        VaiTro = AppRoles.Admin,
-                        TrangThai = 1
-                    },
-                    new TaiKhoan
-                    {
-                        MaTaiKhoan = "TK_ADMIN02",
-                        TenDangNhap = "admin2",
-                        HoTen = "Nguyễn Quản Trị",
-                        Email = "admin2@phongkhamun1.vn",
-                        VaiTro = AppRoles.Admin,
-                        TrangThai = 1
-                    },
-                    new TaiKhoan
-                    {
-                        MaTaiKhoan = "TK_BN01",
-                        TenDangNhap = "benhnhan1",
-                        HoTen = "Trần Văn An",
-                        Email = "tranvanan@gmail.com",
-                        VaiTro = AppRoles.Patient,
-                        TrangThai = 1
-                    },
-                    new TaiKhoan
-                    {
-                        MaTaiKhoan = "TK_BN02",
-                        TenDangNhap = "benhnhan2",
-                        HoTen = "Lê Thị Bình",
-                        Email = "lethibinh@gmail.com",
-                        VaiTro = AppRoles.Patient,
-                        TrangThai = 1
-                    },
-                    new TaiKhoan
-                    {
-                        MaTaiKhoan = "TK_BN03",
-                        TenDangNhap = "benhnhan3",
-                        HoTen = "Phạm Minh Châu",
-                        Email = "phamminhchau@gmail.com",
-                        VaiTro = AppRoles.Patient,
-                        TrangThai = 1
-                    },
-                    new TaiKhoan
-                    {
-                        MaTaiKhoan = "TK_KHOA",
-                        TenDangNhap = "tkbikhoa",
-                        HoTen = "Hoàng Văn Khóa (Tài khoản bị khóa)",
-                        Email = "tkbikhoa@gmail.com",
-                        VaiTro = AppRoles.Patient,
-                        TrangThai = 0 // Dùng để kiểm thử đăng nhập tài khoản bị khóa (Mục 5.6)
-                    }
-                };
+                    MaTaiKhoan = "TK_ADMIN_ROOT",
+                    TenDangNhap = "admin",
+                    HoTen = "ADMIN",
+                    Email = "admin@phongkhamun1.vn",
+                    VaiTro = AppRoles.Admin,
+                    TrangThai = 1
+                }, "admin@123"),
+                (new TaiKhoan
+                {
+                    MaTaiKhoan = "TK_ADMIN02",
+                    TenDangNhap = "admin2",
+                    HoTen = "Nguyễn Quản Trị",
+                    Email = "admin2@phongkhamun1.vn",
+                    VaiTro = AppRoles.Admin,
+                    TrangThai = 1
+                }, "admin@123"),
+                (new TaiKhoan
+                {
+                    MaTaiKhoan = "87d8564c-e5e1-477a-bb9f-3db40eb72975",
+                    TenDangNhap = "benhnhan1",
+                    HoTen = "Hải Đăng",
+                    Email = "hdang@gmail.com",
+                    VaiTro = AppRoles.Patient,
+                    TrangThai = 1
+                }, "123456"),
+                (new TaiKhoan
+                {
+                    MaTaiKhoan = "3c45d5eb-f9b9-495b-99d0-03cc22e32910",
+                    TenDangNhap = "benhnhan01",
+                    HoTen = "Minh Quân",
+                    Email = "mquan@gmail.com",
+                    VaiTro = AppRoles.Patient,
+                    TrangThai = 1
+                }, "123456"),
+                (new TaiKhoan
+                {
+                    MaTaiKhoan = "TK_KHOA",
+                    TenDangNhap = "tkbikhoa",
+                    HoTen = "Hoàng Văn Khóa (Tài khoản bị khóa)",
+                    Email = "tkbikhoa@gmail.com",
+                    VaiTro = AppRoles.Patient,
+                    TrangThai = 0 // Dùng để kiểm thử đăng nhập tài khoản bị khóa (Mục 5.6)
+                }, "123456")
+            };
 
-                foreach (var acc in accounts)
+            bool addedAccount = false;
+            foreach (var item in seedAccounts)
+            {
+                if (!await context.TaiKhoans.AnyAsync(t => t.TenDangNhap == item.Account.TenDangNhap))
                 {
-                    acc.MatKhau = passwordHasher.HashPassword(acc, "123456");
+                    item.Account.MatKhau = passwordHasher.HashPassword(item.Account, item.PlainPassword);
+                    await context.TaiKhoans.AddAsync(item.Account);
+                    addedAccount = true;
                 }
-
-                await context.TaiKhoans.AddRangeAsync(accounts);
+            }
+            if (addedAccount)
+            {
                 await context.SaveChangesAsync();
             }
 
