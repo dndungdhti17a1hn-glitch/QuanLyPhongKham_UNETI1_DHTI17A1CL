@@ -56,6 +56,8 @@ namespace QuanLyPhongKham.Controllers
             var lichHens = await _context.LichHens
                 .Include(l => l.BacSi)
                 .Include(l => l.PhongKham)
+                .Include(l => l.PhieuKham)
+                    .ThenInclude(p => p!.ThanhToan)
                 .Where(l => l.MaBenhNhan == maBenhNhan)
                 .OrderByDescending(l => l.NgayKham)
                 .ThenByDescending(l => l.GioKham)

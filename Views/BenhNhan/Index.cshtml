@@ -171,7 +171,14 @@
                                         }
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        @if (item.TrangThai == "Chờ xác nhận")
+                                        @if (item.TrangThai == "Hoàn tất")
+                                        {
+                                            <a asp-controller="KhamBenh" asp-action="ChiTiet" asp-route-id="@item.MaLichHen" 
+                                               class="inline-flex items-center px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 font-semibold text-xs transition" title="Xem hồ sơ khám & biên lai">
+                                                <i class="fa-solid fa-file-medical mr-1.5"></i>Kết quả khám
+                                            </a>
+                                        }
+                                        else if (item.TrangThai == "Chờ xác nhận")
                                         {
                                             <form asp-action="HuyLich" asp-route-id="@item.MaLichHen" method="post" class="inline"
                                                   onsubmit="return confirm('Bạn có chắc muốn hủy lịch hẹn này không?');">

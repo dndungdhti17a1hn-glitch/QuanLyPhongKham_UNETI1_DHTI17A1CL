@@ -1,0 +1,372 @@
+@model QuanLyPhongKham.Models.ViewModels.BaoCaoThongKeViewModel
+
+@{
+    ViewData["Title"] = "Báo cáo Thống kê LINQ - Phòng Khám";
+}
+
+<!-- Tailwind CSS & FontAwesome & Chart.js -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- Top Header -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <span class="inline-block px-3 py-1 bg-teal-100 text-teal-800 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">Mục 8.6 - Thống Kê Bằng Truy Vấn LINQ</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-teal-600"></i> Báo Cáo Thống Kê Chuyên Sâu
+                </h1>
+                <p class="text-slate-500 text-sm mt-1">Đầy đủ 6 tiêu chí thống kê bắt buộc: Chuyên khoa, Bác sĩ, Dịch vụ, Doanh thu, Tỷ lệ hủy/hoàn tất và Bệnh nhân theo tháng.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a asp-action="Index" class="inline-flex items-center px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Dashboard
+                </a>
+                <button onclick="window.print()" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-sm shadow hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-print mr-2"></i> In Báo Cáo
+                </button>
+            </div>
+        </div>
+
+        <!-- Bộ lọc thời gian (Filter by Date Range) -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <form method="get" asp-action="BaoCao" class="flex flex-wrap items-end gap-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 uppercase mb-1">Từ ngày</label>
+                    <input type="date" name="tuNgay" value="@(Model.TuNgay?.ToString("yyyy-MM-dd"))" 
+                           class="py-2 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 uppercase mb-1">Đến ngày</label>
+                    <input type="date" name="denNgay" value="@(Model.DenNgay?.ToString("yyyy-MM-dd"))" 
+                           class="py-2 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+                </div>
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-5 rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-filter"></i> Lọc báo cáo
+                </button>
+                <a asp-action="BaoCao" class="bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 px-3 rounded-xl transition" title="Xóa bộ lọc ngày">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </form>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 8.6.1 & 8.6.5: Lịch theo chuyên khoa & Tỷ lệ hoàn tất / hủy -->
+        <!-- ============================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- 1. Lịch theo chuyên khoa -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-notes-medical text-teal-600"></i> 1. Lịch Hẹn Theo Chuyên Khoa
+                    </h3>
+                    <span class="text-xs text-slate-400">GroupBy ChuyenKhoa</span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="chartChuyenKhoa"></canvas>
+                </div>
+                <div class="overflow-x-auto pt-2">
+                    <table class="min-w-full text-xs text-left divide-y divide-slate-100">
+                        <thead class="bg-slate-50 font-bold text-slate-600">
+                            <tr>
+                                <th class="py-2 px-3">Chuyên khoa</th>
+                                <th class="py-2 px-3 text-center">Số lịch</th>
+                                <th class="py-2 px-3 text-right">Tỷ lệ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var ck in Model.ThongKeChuyenKhoa)
+                            {
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-800">@ck.Nhan</td>
+                                    <td class="py-2 px-3 text-center text-teal-700 font-bold">@ck.SoLuong</td>
+                                    <td class="py-2 px-3 text-right text-slate-500">@ck.TyLe%</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. Tỷ lệ hoàn tất / hủy -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-purple-600"></i> 5. Tỷ Lệ Hoàn Tất / Hủy Lịch
+                    </h3>
+                    <span class="text-xs text-slate-400">GroupBy TrangThai</span>
+                </div>
+                <div class="h-64 relative flex items-center justify-center">
+                    <canvas id="chartTrangThai"></canvas>
+                </div>
+                <div class="overflow-x-auto pt-2">
+                    <table class="min-w-full text-xs text-left divide-y divide-slate-100">
+                        <thead class="bg-slate-50 font-bold text-slate-600">
+                            <tr>
+                                <th class="py-2 px-3">Trạng thái</th>
+                                <th class="py-2 px-3 text-center">Số lượng</th>
+                                <th class="py-2 px-3 text-right">Tỷ lệ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var tt in Model.ThongKeTrangThai)
+                            {
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-800">@tt.Nhan</td>
+                                    <td class="py-2 px-3 text-center font-bold">@tt.SoLuong</td>
+                                    <td class="py-2 px-3 text-right text-slate-500">@tt.TyLe%</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 8.6.2 & 8.6.3: Bác sĩ nhiều lượt khám & Dịch vụ dùng nhiều -->
+        <!-- ============================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- 2. Bác sĩ nhiều lượt khám -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-user-doctor text-blue-600"></i> 2. Bác Sĩ Nhiều Lượt Khám
+                    </h3>
+                    <span class="text-xs text-slate-400">GroupBy BacSi & OrderByDescending</span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="chartBacSi"></canvas>
+                </div>
+                <div class="overflow-x-auto pt-2">
+                    <table class="min-w-full text-xs text-left divide-y divide-slate-100">
+                        <thead class="bg-slate-50 font-bold text-slate-600">
+                            <tr>
+                                <th class="py-2 px-3">Bác sĩ</th>
+                                <th class="py-2 px-3 text-right">Số lượt khám hoàn tất</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var bs in Model.ThongKeBacSi)
+                            {
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-800">@bs.Nhan</td>
+                                    <td class="py-2 px-3 text-right text-blue-700 font-bold">@bs.SoLuong lượt</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Dịch vụ dùng nhiều -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-vial-virus text-emerald-600"></i> 3. Dịch Vụ Khám Dùng Nhiều Nhất
+                    </h3>
+                    <span class="text-xs text-slate-400">GroupBy DichVuKham & Sum</span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="chartDichVu"></canvas>
+                </div>
+                <div class="overflow-x-auto pt-2">
+                    <table class="min-w-full text-xs text-left divide-y divide-slate-100">
+                        <thead class="bg-slate-50 font-bold text-slate-600">
+                            <tr>
+                                <th class="py-2 px-3">Tên dịch vụ</th>
+                                <th class="py-2 px-3 text-center">Số lượt</th>
+                                <th class="py-2 px-3 text-right">Tổng doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var dv in Model.ThongKeDichVu)
+                            {
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-800">@dv.Nhan</td>
+                                    <td class="py-2 px-3 text-center text-teal-700 font-bold">@dv.SoLuong</td>
+                                    <td class="py-2 px-3 text-right font-bold text-emerald-600">@dv.DoanhThu.ToString("N0") đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 8.6.4 & 8.6.6: Doanh thu theo tháng & Bệnh nhân theo tháng -->
+        <!-- ============================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- 4. Doanh thu theo tháng -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-coins text-amber-500"></i> 4. Doanh Thu Theo Tháng
+                    </h3>
+                    <span class="text-xs text-slate-400">GroupBy Year, Month & Sum SoTien</span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="chartDoanhThu"></canvas>
+                </div>
+                <div class="overflow-x-auto pt-2">
+                    <table class="min-w-full text-xs text-left divide-y divide-slate-100">
+                        <thead class="bg-slate-50 font-bold text-slate-600">
+                            <tr>
+                                <th class="py-2 px-3">Tháng / Năm</th>
+                                <th class="py-2 px-3 text-center">Số giao dịch</th>
+                                <th class="py-2 px-3 text-right">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var dt in Model.ThongKeDoanhThuThang)
+                            {
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-800">@dt.ThoiGian</td>
+                                    <td class="py-2 px-3 text-center text-slate-600">@dt.SoGiaoDich</td>
+                                    <td class="py-2 px-3 text-right font-bold text-emerald-600">@dt.DoanhThu.ToString("N0") đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6. Bệnh nhân theo tháng -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-hospital-user text-teal-600"></i> 6. Bệnh Nhân Khám Theo Tháng
+                    </h3>
+                    <span class="text-xs text-slate-400">GroupBy Year, Month & Distinct BN</span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="chartBenhNhan"></canvas>
+                </div>
+                <div class="overflow-x-auto pt-2">
+                    <table class="min-w-full text-xs text-left divide-y divide-slate-100">
+                        <thead class="bg-slate-50 font-bold text-slate-600">
+                            <tr>
+                                <th class="py-2 px-3">Tháng / Năm</th>
+                                <th class="py-2 px-3 text-right">Số lượng bệnh nhân</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var bn in Model.ThongKeBenhNhanThang)
+                            {
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-800">@bn.ThoiGian</td>
+                                    <td class="py-2 px-3 text-right font-bold text-teal-700">@bn.SoLuong bệnh nhân</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Render biểu đồ Chart.js -->
+<script>
+    // 1. Chart Chuyên khoa
+    new Chart(document.getElementById('chartChuyenKhoa').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeChuyenKhoa.Select(x => x.Nhan))),
+            datasets: [{
+                label: 'Số lịch hẹn',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeChuyenKhoa.Select(x => x.SoLuong))),
+                backgroundColor: '#0d9488',
+                borderRadius: 8
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // 5. Chart Trạng thái
+    new Chart(document.getElementById('chartTrangThai').getContext('2d'), {
+        type: 'pie',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeTrangThai.Select(x => x.Nhan))),
+            datasets: [{
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeTrangThai.Select(x => x.SoLuong))),
+                backgroundColor: ['#10b981', '#3b82f6', '#a855f7', '#f59e0b', '#f43f5e']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 2. Chart Bác sĩ
+    new Chart(document.getElementById('chartBacSi').getContext('2d'), {
+        type: 'bar',
+        indexAxis: 'y',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeBacSi.Select(x => x.Nhan))),
+            datasets: [{
+                label: 'Lượt khám',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeBacSi.Select(x => x.SoLuong))),
+                backgroundColor: '#3b82f6',
+                borderRadius: 6
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // 3. Chart Dịch vụ
+    new Chart(document.getElementById('chartDichVu').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeDichVu.Select(x => x.Nhan))),
+            datasets: [{
+                label: 'Số lần chỉ định',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeDichVu.Select(x => x.SoLuong))),
+                backgroundColor: '#10b981',
+                borderRadius: 6
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // 4. Chart Doanh thu theo tháng
+    new Chart(document.getElementById('chartDoanhThu').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeDoanhThuThang.Select(x => x.ThoiGian))),
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeDoanhThuThang.Select(x => x.DoanhThu))),
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 6. Chart Bệnh nhân theo tháng
+    new Chart(document.getElementById('chartBenhNhan').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeBenhNhanThang.Select(x => x.ThoiGian))),
+            datasets: [{
+                label: 'Bệnh nhân',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThongKeBenhNhanThang.Select(x => x.SoLuong))),
+                backgroundColor: '#14b8a6',
+                borderRadius: 6
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+</script>

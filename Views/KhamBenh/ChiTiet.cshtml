@@ -1,0 +1,192 @@
+@model QuanLyPhongKham.Models.LichHen
+
+@{
+    ViewData["Title"] = "Hồ sơ chi tiết lịch hẹn - " + Model.MaLichHen;
+    var phieu = Model.PhieuKham;
+    var tt = phieu?.ThanhToan;
+}
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto space-y-6">
+
+        <!-- Top Breadcrumb & Action -->
+        <div class="flex items-center justify-between">
+            <a asp-action="Index" class="inline-flex items-center text-sm font-semibold text-slate-600 hover:text-teal-600 transition">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại danh sách lịch hẹn
+            </a>
+            <div class="flex items-center gap-2">
+                @if (tt != null)
+                {
+                    <a asp-action="HoaDon" asp-route-maThanhToan="@tt.MaThanhToan" class="inline-flex items-center px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs shadow hover:bg-emerald-700 transition">
+                        <i class="fa-solid fa-receipt mr-1.5"></i> Xem Hóa đơn
+                    </a>
+                }
+                @if (Model.TrangThai == "Đã tiếp nhận" && phieu == null)
+                {
+                    <a asp-action="Kham" asp-route-id="@Model.MaLichHen" class="inline-flex items-center px-4 py-2 rounded-xl bg-teal-600 text-white font-semibold text-xs shadow hover:bg-teal-700 transition">
+                        <i class="fa-solid fa-stethoscope mr-1.5"></i> Tiếp tục khám
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Header Card -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-black text-slate-900">Lịch Hẹn: @Model.MaLichHen</h1>
+                    @switch (Model.TrangThai)
+                    {
+                        case "Chờ xác nhận":
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Chờ xác nhận</span>
+                            break;
+                        case "Đã xác nhận":
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">Đã xác nhận</span>
+                            break;
+                        case "Đã tiếp nhận":
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">Đã tiếp nhận</span>
+                            break;
+                        case "Hoàn tất":
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Hoàn tất</span>
+                            break;
+                        case "Đã hủy":
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Đã hủy</span>
+                            break;
+                    }
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                    Thời gian khám: <strong class="text-slate-800">@Model.GioKham.ToString(@"hh\:mm") ngày @Model.NgayKham.ToString("dd/MM/yyyy")</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Thông tin Bệnh nhân & Bác sĩ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Bệnh nhân -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-user text-teal-600"></i> Bệnh nhân
+                </h3>
+                <div class="space-y-1.5 text-xs text-slate-600">
+                    <p><strong class="text-slate-800">Họ và tên:</strong> <span class="text-sm font-bold text-slate-900">@Model.BenhNhan?.HoTen</span></p>
+                    <p><strong class="text-slate-800">Mã bệnh nhân:</strong> @Model.BenhNhan?.MaBenhNhan</p>
+                    <p><strong class="text-slate-800">Số điện thoại:</strong> @Model.BenhNhan?.SoDienThoai</p>
+                    <p><strong class="text-slate-800">Giới tính:</strong> @Model.BenhNhan?.GioiTinh - <strong class="text-slate-800">Ngày sinh:</strong> @(Model.BenhNhan?.NgaySinh?.ToString("dd/MM/yyyy") ?? "N/A")</p>
+                    <p><strong class="text-slate-800">Địa chỉ:</strong> @Model.BenhNhan?.DiaChi</p>
+                </div>
+            </div>
+
+            <!-- Bác sĩ & Phòng -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-hospital-user text-purple-600"></i> Phân công khám
+                </h3>
+                <div class="space-y-1.5 text-xs text-slate-600">
+                    <p><strong class="text-slate-800">Bác sĩ:</strong> <span class="text-sm font-bold text-slate-900">@Model.BacSi?.HoTen</span></p>
+                    <p><strong class="text-slate-800">Phòng khám:</strong> @Model.PhongKham?.TenPhong</p>
+                    <p><strong class="text-slate-800">Lý do khám:</strong> @(string.IsNullOrEmpty(Model.LyDoKham) ? "Khám bệnh định kỳ" : Model.LyDoKham)</p>
+                    @if (!string.IsNullOrEmpty(Model.GhiChu))
+                    {
+                        <p class="text-amber-700 bg-amber-50 p-2 rounded-lg mt-2">
+                            <i class="fa-solid fa-note-sticky mr-1"></i> @Model.GhiChu
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi tiết Phiếu khám bệnh (Nếu đã có) -->
+        @if (phieu != null)
+        {
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-bold text-teal-600 uppercase tracking-wider block">Phiếu khám bệnh điện tử</span>
+                        <h3 class="text-lg font-bold text-slate-900 mt-0.5">Mã phiếu: @phieu.MaPhieuKham</h3>
+                    </div>
+                    <span class="text-xs text-slate-500">Khám ngày: @phieu.NgayKham.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-1">
+                        <span class="font-bold text-slate-500 uppercase tracking-wider block text-[11px]">Chẩn đoán:</span>
+                        <p class="text-sm font-semibold text-slate-800">@phieu.ChanDoan</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-1">
+                        <span class="font-bold text-slate-500 uppercase tracking-wider block text-[11px]">Kết luận & Hướng điều trị:</span>
+                        <p class="text-sm font-semibold text-slate-800">@phieu.KetLuan</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(phieu.GhiChu))
+                {
+                    <div class="p-3 bg-teal-50/50 rounded-xl text-xs text-teal-800">
+                        <strong>Lời dặn bác sĩ:</strong> @phieu.GhiChu
+                    </div>
+                }
+
+                <!-- Bảng dịch vụ thực tế -->
+                <div class="space-y-3 pt-2">
+                    <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Dịch vụ chỉ định & Sử dụng thực tế</h4>
+                    <table class="min-w-full text-left text-xs divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden">
+                        <thead class="bg-slate-50 text-slate-600">
+                            <tr>
+                                <th class="py-2.5 px-3">Tên dịch vụ</th>
+                                <th class="py-2.5 px-3 text-center">Số lượng</th>
+                                <th class="py-2.5 px-3 text-right">Đơn giá</th>
+                                <th class="py-2.5 px-3 text-right">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach (var c in phieu.ChiTietDichVus)
+                            {
+                                <tr>
+                                    <td class="py-2.5 px-3 font-medium text-slate-800">@c.DichVuKham?.TenDichVu</td>
+                                    <td class="py-2.5 px-3 text-center">@c.SoLuong</td>
+                                    <td class="py-2.5 px-3 text-right">@c.DonGia.ToString("N0") đ</td>
+                                    <td class="py-2.5 px-3 text-right font-bold text-slate-900">@c.ThanhTien.ToString("N0") đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Thông tin thanh toán -->
+                <div class="border-t border-slate-100 pt-4 flex items-center justify-between text-xs">
+                    <div>
+                        @if (tt != null)
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                                <i class="fa-solid fa-circle-check"></i> Đã thanh toán qua @tt.PhuongThuc (@tt.NgayThanhToan.ToString("dd/MM/yyyy HH:mm"))
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-bold">
+                                <i class="fa-solid fa-clock"></i> Chưa thanh toán
+                            </span>
+                        }
+                    </div>
+                    @if (tt != null)
+                    {
+                        <div class="text-right">
+                            <span class="text-slate-500 text-xs block">Tổng tiền:</span>
+                            <span class="text-xl font-black text-emerald-600">@tt.SoTien.ToString("N0") đ</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center text-slate-400">
+                <i class="fa-solid fa-clipboard-list text-4xl mb-2 block"></i>
+                <p class="text-sm">Chưa có kết quả khám bệnh cho lịch hẹn này.</p>
+            </div>
+        }
+
+    </div>
+</div>

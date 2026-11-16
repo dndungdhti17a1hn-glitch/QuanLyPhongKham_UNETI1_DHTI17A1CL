@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyPhongKham.Models
 {
@@ -13,6 +14,27 @@ namespace QuanLyPhongKham.Models
         [StringLength(100)]
         [Display(Name = "Họ và tên")]
         public string HoTen { get; set; } = string.Empty;
+
+        [StringLength(20)]
+        [Display(Name = "Mã chuyên khoa")]
+        public string? MaChuyenKhoa { get; set; }
+
+        [ForeignKey("MaChuyenKhoa")]
+        public virtual ChuyenKhoa? ChuyenKhoa { get; set; }
+
+        [StringLength(100)]
+        [Display(Name = "Chuyên môn")]
+        public string? ChuyenMon { get; set; }
+
+        [EmailAddress]
+        [StringLength(100)]
+        [Display(Name = "Email")]
+        public string? Email { get; set; }
+
+        [Phone]
+        [StringLength(15)]
+        [Display(Name = "Số điện thoại")]
+        public string? SoDienThoai { get; set; }
 
         [Required]
         [StringLength(50)]

@@ -57,5 +57,8 @@ namespace QuanLyPhongKham.Models
         [StringLength(500)]
         [Display(Name = "Ghi chú")]
         public string? GhiChu { get; set; }
+
+        // Navigation property liên kết với Module 4 (Phiếu khám)
+        public virtual PhieuKham? PhieuKham { get; set; }
     }
 }

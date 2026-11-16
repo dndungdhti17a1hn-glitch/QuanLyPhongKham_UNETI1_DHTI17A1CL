@@ -1,0 +1,195 @@
+@model QuanLyPhongKham.Models.ViewModels.LapPhieuKhamViewModel
+
+@{
+    ViewData["Title"] = "Lập Phiếu Khám Bệnh - " + Model.MaLichHen;
+    var lich = Model.LichHen;
+    var bn = lich?.BenhNhan;
+}
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto space-y-6">
+
+        <!-- Navigation Breadcrumb -->
+        <div class="flex items-center space-x-2 text-sm text-slate-500">
+            <a asp-action="Index" class="hover:text-teal-600 transition">Quản lý Lịch hẹn</a>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+            <span class="text-slate-900 font-semibold">Khám bệnh & Lập phiếu khám</span>
+        </div>
+
+        <!-- Header -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">Mục 8.1 & 8.2 - Tiếp nhận & Khám</span>
+                <h1 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-file-waveform text-teal-600"></i> Lập Phiếu Khám Bệnh
+                </h1>
+                <p class="text-slate-500 text-sm mt-1">Chỉ định dịch vụ thực tế, ghi nhận chẩn đoán và hướng điều trị cho bệnh nhân.</p>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-slate-400 block">Mã lịch hẹn:</span>
+                <span class="text-lg font-bold text-teal-700">@Model.MaLichHen</span>
+            </div>
+        </div>
+
+        <!-- Thông tin tóm tắt Bệnh nhân & Bác sĩ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Thông tin bệnh nhân -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-user text-teal-600"></i> Thông tin bệnh nhân
+                </h3>
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-teal-500 text-white flex items-center justify-center text-xl font-bold flex-shrink-0">
+                        @(bn?.HoTen?.Substring(0, 1).ToUpper() ?? "B")
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <div class="font-bold text-slate-900 text-base">@bn?.HoTen</div>
+                        <div class="text-slate-600 text-xs flex flex-wrap gap-x-4 gap-y-1">
+                            <span><i class="fa-solid fa-venus-mars text-slate-400"></i> Giới tính: @bn?.GioiTinh</span>
+                            <span><i class="fa-solid fa-cake-candles text-slate-400"></i> Ngày sinh: @(bn?.NgaySinh?.ToString("dd/MM/yyyy") ?? "N/A")</span>
+                            <span><i class="fa-solid fa-phone text-slate-400"></i> SĐT: @bn?.SoDienThoai</span>
+                        </div>
+                        <div class="text-xs text-slate-500 pt-1">
+                            <i class="fa-solid fa-location-dot text-slate-400"></i> @(string.IsNullOrEmpty(bn?.DiaChi) ? "Chưa có địa chỉ" : bn?.DiaChi)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bác sĩ & Phòng khám -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-hospital text-purple-600"></i> Bác sĩ & Lịch hẹn
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Bác sĩ phụ trách:</span>
+                        <span class="font-bold text-slate-800"><i class="fa-solid fa-user-doctor text-teal-600"></i> @lich?.BacSi?.HoTen</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Phòng khám:</span>
+                        <span class="font-semibold text-slate-800">@lich?.PhongKham?.TenPhong</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Thời gian khám:</span>
+                        <span class="font-semibold text-teal-700">@lich?.GioKham.ToString(@"hh\:mm") - @lich?.NgayKham.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="pt-1 border-t border-slate-100 flex items-start justify-between">
+                        <span class="text-slate-500 text-xs">Lý do khám:</span>
+                        <span class="text-xs font-medium text-slate-700 text-right">@(string.IsNullOrEmpty(lich?.LyDoKham) ? "Khám bệnh" : lich?.LyDoKham)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form nhập phiếu khám bệnh -->
+        <form asp-action="Kham" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MaLichHen" />
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                <h2 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-teal-600"></i> Kết Quả Thăm Khám & Chỉ Định
+                </h2>
+
+                <div asp-validation-summary="ModelOnly" class="text-rose-600 text-sm font-semibold"></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Chẩn đoán -->
+                    <div class="space-y-2">
+                        <label asp-for="ChanDoan" class="block text-xs font-bold text-slate-700 uppercase">
+                            Chẩn đoán bệnh <span class="text-rose-500">*</span>
+                        </label>
+                        <textarea asp-for="ChanDoan" rows="3" required placeholder="Nhập chẩn đoán sơ bộ hoặc chẩn đoán xác định..." 
+                                  class="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                        <span asp-validation-for="ChanDoan" class="text-rose-500 text-xs"></span>
+                    </div>
+
+                    <!-- Kết luận & Hướng điều trị -->
+                    <div class="space-y-2">
+                        <label asp-for="KetLuan" class="block text-xs font-bold text-slate-700 uppercase">
+                            Kết luận & Hướng điều trị <span class="text-rose-500">*</span>
+                        </label>
+                        <textarea asp-for="KetLuan" rows="3" required placeholder="Nhập kết luận, kê đơn thuốc hoặc hướng xử lý điều trị..." 
+                                  class="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                        <span asp-validation-for="KetLuan" class="text-rose-500 text-xs"></span>
+                    </div>
+                </div>
+
+                <!-- Lời dặn / Ghi chú -->
+                <div class="space-y-2">
+                    <label asp-for="GhiChu" class="block text-xs font-bold text-slate-700 uppercase">
+                        Ghi chú & Lời dặn dò bác sĩ
+                    </label>
+                    <textarea asp-for="GhiChu" rows="2" placeholder="Ví dụ: Tái khám sau 7 ngày, kiêng đồ uống có cồn, uống nhiều nước..." 
+                              class="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                    <span asp-validation-for="GhiChu" class="text-rose-500 text-xs"></span>
+                </div>
+
+                <!-- Mục 8.3 & 8.6: Chỉ định dịch vụ thực tế -->
+                <div class="space-y-3 pt-4 border-t border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-800">
+                                <i class="fa-solid fa-list-check text-teal-600 mr-1.5"></i> Chỉ định dịch vụ cận lâm sàng & xét nghiệm thực tế
+                            </label>
+                            <p class="text-xs text-slate-500">Tích chọn các dịch vụ bệnh nhân đã thực hiện để tính chi phí viện phí chính xác (Quy định 8.3).</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-500 block">Ước tính viện phí:</span>
+                            <span id="txtTongTien" class="text-lg font-bold text-emerald-600">0 đ</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+                        @foreach (var dv in Model.DanhSachDichVu)
+                        {
+                            <label class="flex items-start space-x-3 p-3.5 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/30 transition cursor-pointer">
+                                <input type="checkbox" name="SelectedDichVuIds" value="@dv.MaDichVu" data-gia="@dv.GiaTien"
+                                       class="chk-dichvu mt-1 w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500" 
+                                       onchange="recalculateTotal()" />
+                                <div class="flex-1 text-xs">
+                                    <span class="font-bold text-slate-800 block text-sm">@dv.TenDichVu</span>
+                                    <span class="text-emerald-700 font-semibold block mt-0.5">@dv.GiaTien.ToString("N0") đ</span>
+                                    <span class="text-slate-400 text-[11px] block mt-1 line-clamp-1">@dv.MoTa</span>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <a asp-action="Index" class="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+                        Quay lại
+                    </a>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-lg shadow-teal-500/30 transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu Phiếu & Chuyển Sang Thanh Toán
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function recalculateTotal() {
+        let total = 0;
+        const checkboxes = document.querySelectorAll('.chk-dichvu:checked');
+        checkboxes.forEach(chk => {
+            const price = parseFloat(chk.getAttribute('data-gia')) || 0;
+            total += price;
+        });
+        if (checkboxes.length === 0) {
+            document.getElementById('txtTongTien').innerText = "150,000 đ (Khám mặc định)";
+        } else {
+            document.getElementById('txtTongTien').innerText = new Intl.NumberFormat('vi-VN').format(total) + " đ";
+        }
+    }
+    // Chạy khởi tạo
+    recalculateTotal();
+</script>
