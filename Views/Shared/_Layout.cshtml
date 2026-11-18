@@ -3,111 +3,230 @@
 @inject ICurrentUser CurrentUser
 
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="scroll-smooth">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - QuanLyPhongKham_UNETI1_DHTI17A1CL</title>
+    <title>@ViewData["Title"] - Phòng Khám Đa Khoa UN1</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuanLyPhongKham_UNETI1_DHTI17A1CL.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index" asp-route-view="landing">QuanLyPhongKham_UNETI1_DHTI17A1CL</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index" asp-route-view="landing">Trang chủ</a>
-                        </li>
-                        @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Admin)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="TaiKhoan" asp-action="Index">Quản lý Tài khoản</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="ChuyenKhoa" asp-action="Index">Quản lý Chuyên khoa</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="DichVuKham" asp-action="Index">Quản lý Dịch vụ</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-primary fw-bold" asp-area="" asp-controller="KhamBenh" asp-action="Index">🩺 Khám & Lịch hẹn</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-success fw-bold" asp-area="" asp-controller="ThongKe" asp-action="Index">📊 Dashboard & Thống kê</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="ChuyenKhoa" asp-action="TraCuu">Chuyên khoa</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="DichVuKham" asp-action="TraCuu">Bảng giá Dịch vụ</a>
-                            </li>
-                        }
-                        @if (CurrentUser.IsAuthenticated && (CurrentUser.VaiTro == AppRoles.Patient || CurrentUser.VaiTro == "Bệnh nhân"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-semibold" asp-area="" asp-controller="BenhNhan" asp-action="DatLich">📅 Đặt lịch khám</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-semibold" asp-area="" asp-controller="BenhNhan" asp-action="Index">📋 Lịch sử khám</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark fw-semibold" asp-area="" asp-controller="BenhNhan" asp-action="HoSo">👤 Hồ sơ</a>
-                            </li>
-                        }
-                    </ul>
-                    
-                    <ul class="navbar-nav">
-                        @if (CurrentUser.IsAuthenticated)
-                        {
-                            <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-primary fw-semibold">Xin chào, @CurrentUser.HoTen (@CurrentUser.TenVaiTro)</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="form-inline">
-                                    <button type="submit" class="btn btn-link nav-link text-danger">Đăng xuất</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - QuanLyPhongKham_UNETI1_DHTI17A1CL - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Tailwind CSS & Inter Font & Font Awesome (đồng bộ UN1 Clinic) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans text-slate-800 bg-slate-50 antialiased selection:bg-teal-500 selection:text-white min-h-screen flex flex-col">
+
+    <!-- Thanh Điều Hướng UN1 Clinic -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20 gap-4">
+
+                <!-- Logo UN1 -->
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-route-view="landing" class="flex items-center space-x-3 group shrink-0 no-underline">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-teal-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-teal-500/20 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-staff-snake text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-extrabold bg-gradient-to-r from-teal-800 to-cyan-700 bg-clip-text text-transparent block leading-none">UN1</span>
+                        <span class="text-[11px] text-slate-500 font-semibold tracking-wider">CLINIC &amp; HEALTHCARE</span>
+                    </div>
+                </a>
+
+                <!-- Menu Desktop -->
+                <nav class="hidden lg:flex items-center space-x-5 font-medium text-sm text-slate-600">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" asp-route-view="landing"
+                       class="hover:text-teal-600 transition py-2 no-underline text-slate-600">Trang chủ</a>
+
+                    @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Admin)
+                    {
+                        <a asp-area="" asp-controller="TaiKhoan" asp-action="Index"
+                           class="hover:text-teal-600 transition py-2 no-underline text-slate-700 font-semibold">Tài khoản</a>
+                        <a asp-area="" asp-controller="ChuyenKhoa" asp-action="Index"
+                           class="hover:text-teal-600 transition py-2 no-underline text-slate-700 font-semibold">Chuyên khoa</a>
+                        <a asp-area="" asp-controller="DichVuKham" asp-action="Index"
+                           class="hover:text-teal-600 transition py-2 no-underline text-slate-700 font-semibold">Dịch vụ</a>
+                        <a asp-area="" asp-controller="KhamBenh" asp-action="Index"
+                           class="hover:text-teal-700 transition py-2 no-underline text-teal-600 font-semibold flex items-center gap-1.5">
+                            <i class="fa-solid fa-stethoscope"></i> Khám &amp; Lịch hẹn
+                        </a>
+                        <a asp-area="" asp-controller="ThongKe" asp-action="Index"
+                           class="hover:text-emerald-700 transition py-2 no-underline text-emerald-600 font-semibold flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-pie"></i> Thống kê
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="" asp-controller="ChuyenKhoa" asp-action="TraCuu"
+                           class="hover:text-teal-600 transition py-2 no-underline text-slate-600">Chuyên khoa</a>
+                        <a asp-area="" asp-controller="DichVuKham" asp-action="TraCuu"
+                           class="hover:text-teal-600 transition py-2 no-underline text-slate-600">Bảng giá dịch vụ</a>
+                    }
+
+                    @if (CurrentUser.IsAuthenticated && (CurrentUser.VaiTro == AppRoles.Patient || CurrentUser.VaiTro == "Bệnh nhân"))
+                    {
+                        <a asp-area="" asp-controller="BenhNhan" asp-action="DatLich"
+                           class="hover:text-teal-700 transition py-2 no-underline text-teal-600 font-semibold flex items-center gap-1.5">
+                            <i class="fa-regular fa-calendar-plus"></i> Đặt lịch khám
+                        </a>
+                        <a asp-area="" asp-controller="BenhNhan" asp-action="Index"
+                           class="hover:text-teal-600 transition py-2 no-underline text-slate-700 font-semibold flex items-center gap-1.5">
+                            <i class="fa-solid fa-clipboard-list"></i> Lịch sử khám
+                        </a>
+                        <a asp-area="" asp-controller="BenhNhan" asp-action="HoSo"
+                           class="hover:text-teal-600 transition py-2 no-underline text-slate-700 font-semibold flex items-center gap-1.5">
+                            <i class="fa-regular fa-user"></i> Hồ sơ
+                        </a>
+                    }
+                </nav>
+
+                <!-- Cụm Tài khoản / Auth (Desktop) -->
+                <div class="hidden lg:flex items-center space-x-3 shrink-0">
+                    @if (CurrentUser.IsAuthenticated)
+                    {
+                        <div class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-teal-50 border border-teal-100">
+                            <div class="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div class="leading-tight">
+                                <span class="text-xs font-bold text-slate-800 block">@CurrentUser.HoTen</span>
+                                <span class="text-[11px] font-medium text-teal-700">@CurrentUser.TenVaiTro</span>
+                            </div>
+                        </div>
+                        <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="m-0">
+                            <button type="submit"
+                                    class="px-4 py-2.5 rounded-xl font-semibold text-sm text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-area="" asp-controller="TaiKhoan" asp-action="DangNhap"
+                           class="px-4 py-2.5 rounded-xl font-semibold text-sm text-teal-700 hover:bg-teal-50 transition no-underline flex items-center gap-1.5">
+                            <i class="fa-regular fa-user"></i> Đăng nhập
+                        </a>
+                        <a asp-area="" asp-controller="TaiKhoan" asp-action="DangKy"
+                           class="px-5 py-2.5 rounded-xl font-semibold text-sm bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-500/25 transition transform hover:-translate-y-0.5 no-underline">
+                            Đăng ký ngay
+                        </a>
+                    }
+                </div>
+
+                <!-- Nút Menu Mobile -->
+                <button type="button" id="un1-mobile-toggle"
+                        class="lg:hidden p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-teal-600 transition"
+                        aria-label="Mở menu">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menu Mobile Dropdown -->
+        <div id="un1-mobile-menu" class="hidden lg:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-2 shadow-lg">
+            <a asp-area="" asp-controller="Home" asp-action="Index" asp-route-view="landing"
+               class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-700 no-underline">
+                <i class="fa-solid fa-house w-5 text-teal-600"></i> Trang chủ
+            </a>
+
+            @if (CurrentUser.IsAuthenticated && CurrentUser.VaiTro == AppRoles.Admin)
+            {
+                <a asp-area="" asp-controller="TaiKhoan" asp-action="Index" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-teal-50 no-underline">Quản lý Tài khoản</a>
+                <a asp-area="" asp-controller="ChuyenKhoa" asp-action="Index" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-teal-50 no-underline">Quản lý Chuyên khoa</a>
+                <a asp-area="" asp-controller="DichVuKham" asp-action="Index" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-teal-50 no-underline">Quản lý Dịch vụ</a>
+                <a asp-area="" asp-controller="KhamBenh" asp-action="Index" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-teal-700 hover:bg-teal-50 no-underline">Khám &amp; Lịch hẹn</a>
+                <a asp-area="" asp-controller="ThongKe" asp-action="Index" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 hover:bg-emerald-50 no-underline">Dashboard &amp; Thống kê</a>
+            }
+            else
+            {
+                <a asp-area="" asp-controller="ChuyenKhoa" asp-action="TraCuu" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-teal-50 no-underline">Chuyên khoa</a>
+                <a asp-area="" asp-controller="DichVuKham" asp-action="TraCuu" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-teal-50 no-underline">Bảng giá dịch vụ</a>
+            }
+
+            @if (CurrentUser.IsAuthenticated && (CurrentUser.VaiTro == AppRoles.Patient || CurrentUser.VaiTro == "Bệnh nhân"))
+            {
+                <a asp-area="" asp-controller="BenhNhan" asp-action="DatLich" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-teal-700 hover:bg-teal-50 no-underline">Đặt lịch khám</a>
+                <a asp-area="" asp-controller="BenhNhan" asp-action="Index" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-teal-50 no-underline">Lịch sử khám</a>
+                <a asp-area="" asp-controller="BenhNhan" asp-action="HoSo" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-teal-50 no-underline">Hồ sơ cá nhân</a>
+            }
+
+            <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                @if (CurrentUser.IsAuthenticated)
+                {
+                    <div class="px-3.5 py-2 text-xs text-slate-500">
+                        Đang đăng nhập: <strong class="text-slate-800">@CurrentUser.HoTen</strong> (@CurrentUser.TenVaiTro)
+                    </div>
+                    <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="m-0">
+                        <button type="submit" class="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition">
+                            <i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-area="" asp-controller="TaiKhoan" asp-action="DangNhap" class="block text-center px-4 py-2.5 rounded-xl text-sm font-semibold text-teal-700 bg-teal-50 no-underline">Đăng nhập</a>
+                    <a asp-area="" asp-controller="TaiKhoan" asp-action="DangKy" class="block text-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-teal-600 no-underline">Đăng ký ngay</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <!-- Nội dung chính -->
+    <main role="main" class="flex-1">
+        @RenderBody()
+    </main>
+
+    <!-- Footer UN1 Clinic -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-teal-700">UN1 CLINIC &amp; HEALTHCARE</span>
+                <span>•</span>
+                <span>&copy; 2026 - Hệ thống Quản lý Phòng khám &amp; Lịch hẹn</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-route-view="landing" class="hover:text-teal-600 transition no-underline text-slate-500">Trang chủ</a>
+                <a asp-area="" asp-controller="ChuyenKhoa" asp-action="TraCuu" class="hover:text-teal-600 transition no-underline text-slate-500">Chuyên khoa</a>
+                <a asp-area="" asp-controller="DichVuKham" asp-action="TraCuu" class="hover:text-teal-600 transition no-underline text-slate-500">Bảng giá</a>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy" class="hover:text-teal-600 transition no-underline text-slate-500">Chính sách</a>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('un1-mobile-toggle')?.addEventListener('click', function () {
+            document.getElementById('un1-mobile-menu')?.classList.toggle('hidden');
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -10,166 +10,261 @@
     int? trangThaiFilter = ViewData["TrangThaiFilter"] as int?;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Quản lý Tài khoản người dùng</h2>
-    <a asp-action="Create" class="btn btn-primary">+ Thêm mới tài khoản</a>
-</div>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    <div id="toast-success" class="fixed top-20 right-5 z-50">
+        <div class="bg-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-2xl"></i>
+            <div>
+                <p class="font-bold text-sm">Thành công</p>
+                <p class="text-xs opacity-90">@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    </div>
+    <script>setTimeout(() => document.getElementById('toast-success')?.remove(), 4000);</script>
 }
+
 @if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    <div id="toast-error" class="fixed top-20 right-5 z-50">
+        <div class="bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+            <div>
+                <p class="font-bold text-sm">Lỗi</p>
+                <p class="text-xs opacity-90">@TempData["ErrorMessage"]</p>
+            </div>
+        </div>
+    </div>
+    <script>setTimeout(() => document.getElementById('toast-error')?.remove(), 5000);</script>
 }
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
-    <input type="hidden" name="sortOrder" value="@currentSort" />
-    <div class="col-md-4">
-        <input type="text" name="searchString" value="@currentFilter" class="form-control" placeholder="Tìm theo tên đăng nhập, họ tên, email..." />
-    </div>
-    <div class="col-md-3">
-        <select name="vaiTroFilter" class="form-select">
-            <option value="">-- Tất cả vai trò --</option>
-            <option value="@AppRoles.Admin" selected="@(vaiTroFilter == AppRoles.Admin)">Admin</option>
-            <option value="@AppRoles.Patient" selected="@(vaiTroFilter == AppRoles.Patient)">Bệnh nhân</option>
-        </select>
-    </div>
-    <div class="col-md-3">
-        <select name="trangThaiFilter" class="form-select">
-            <option value="">-- Tất cả trạng thái --</option>
-            <option value="1" selected="@(trangThaiFilter == 1)">Đang hoạt động</option>
-            <option value="0" selected="@(trangThaiFilter == 0)">Đã khóa</option>
-        </select>
-    </div>
-    <div class="col-md-2 d-flex gap-1">
-        <button class="btn btn-secondary w-100" type="submit">Lọc</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
-    </div>
-</form>
+<div class="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8" style="font-family: 'Inter', sans-serif;">
+    <div class="max-w-7xl mx-auto space-y-6">
 
-<table class="table table-bordered table-striped align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>Mã TK</th>
-            <th>
-                <a asp-action="Index"
-                   asp-route-sortOrder="@ViewData["UsernameSortParm"]"
-                   asp-route-searchString="@currentFilter"
-                   asp-route-vaiTroFilter="@vaiTroFilter"
-                   asp-route-trangThaiFilter="@trangThaiFilter">
-                    Tên đăng nhập
+        <!-- Header Card -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <span class="inline-block px-3 py-1 bg-teal-100 text-teal-800 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">
+                    Module 1 - Quản trị hệ thống
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                    <i class="fa-solid fa-users-gear text-teal-600"></i> Quản lý Tài khoản người dùng
+                </h1>
+                <p class="text-slate-500 text-sm mt-1">Quản lý tài khoản Admin và Bệnh nhân, phân quyền truy cập và kiểm soát trạng thái hoạt động.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a asp-action="Create"
+                   class="inline-flex items-center px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-lg shadow-teal-500/25 transition">
+                    <i class="fa-solid fa-user-plus mr-2"></i> Thêm mới tài khoản
                 </a>
-            </th>
-            <th>
-                <a asp-action="Index"
-                   asp-route-sortOrder="@ViewData["NameSortParm"]"
-                   asp-route-searchString="@currentFilter"
-                   asp-route-vaiTroFilter="@vaiTroFilter"
-                   asp-route-trangThaiFilter="@trangThaiFilter">
-                    Họ và tên
-                </a>
-            </th>
-            <th>Email</th>
-            <th>Vai trò</th>
-            <th>Trạng thái</th>
-            <th class="text-center">Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (!Model.Any())
-        {
-            <tr>
-                <td colspan="7" class="text-center text-muted py-4">Không tìm thấy tài khoản nào phù hợp.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.MaTaiKhoan</td>
-                    <td class="fw-semibold">@item.TenDangNhap</td>
-                    <td>@item.HoTen</td>
-                    <td>@item.Email</td>
-                    <td>
-                        @if (item.VaiTro == AppRoles.Admin)
+            </div>
+        </div>
+
+        <!-- Filter & Search Card -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <form asp-action="Index" method="get" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <input type="hidden" name="sortOrder" value="@currentSort" />
+                <div class="md:col-span-5 relative">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-sm"></i>
+                    <input type="text" name="searchString" value="@currentFilter"
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm text-slate-800 transition"
+                           placeholder="Tìm theo tên đăng nhập, họ tên, email..." />
+                </div>
+                <div class="md:col-span-3">
+                    <select name="vaiTroFilter"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm text-slate-700 transition">
+                        <option value="">-- Tất cả vai trò --</option>
+                        <option value="@AppRoles.Admin" selected="@(vaiTroFilter == AppRoles.Admin)">Admin</option>
+                        <option value="@AppRoles.Patient" selected="@(vaiTroFilter == AppRoles.Patient)">Bệnh nhân</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <select name="trangThaiFilter"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm text-slate-700 transition">
+                        <option value="">-- Trạng thái --</option>
+                        <option value="1" selected="@(trangThaiFilter == 1)">Đang hoạt động</option>
+                        <option value="0" selected="@(trangThaiFilter == 0)">Đã khóa</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2 flex gap-2">
+                    <button type="submit"
+                            class="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm transition">
+                        <i class="fa-solid fa-filter mr-1.5"></i> Lọc
+                    </button>
+                    <a asp-action="Index"
+                       class="inline-flex items-center justify-center px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-sm transition"
+                       title="Xóa bộ lọc">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mã TK</th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <a asp-action="Index"
+                                   asp-route-sortOrder="@ViewData["UsernameSortParm"]"
+                                   asp-route-searchString="@currentFilter"
+                                   asp-route-vaiTroFilter="@vaiTroFilter"
+                                   asp-route-trangThaiFilter="@trangThaiFilter"
+                                   class="inline-flex items-center gap-1.5 hover:text-teal-600 transition">
+                                    Tên đăng nhập <i class="fa-solid fa-sort text-slate-400"></i>
+                                </a>
+                            </th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <a asp-action="Index"
+                                   asp-route-sortOrder="@ViewData["NameSortParm"]"
+                                   asp-route-searchString="@currentFilter"
+                                   asp-route-vaiTroFilter="@vaiTroFilter"
+                                   asp-route-trangThaiFilter="@trangThaiFilter"
+                                   class="inline-flex items-center gap-1.5 hover:text-teal-600 transition">
+                                    Họ và tên <i class="fa-solid fa-sort text-slate-400"></i>
+                                </a>
+                            </th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Vai trò</th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                            <th class="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        @if (!Model.Any())
                         {
-                            <span class="badge bg-primary">Admin</span>
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center">
+                                    <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                                        <i class="fa-regular fa-folder-open text-2xl"></i>
+                                    </div>
+                                    <p class="text-slate-500 font-medium text-sm">Không tìm thấy tài khoản nào phù hợp.</p>
+                                </td>
+                            </tr>
                         }
                         else
                         {
-                            <span class="badge bg-info text-dark">Bệnh nhân</span>
-                        }
-                    </td>
-                    <td>
-                        @if (item.TrangThai == 1)
-                        {
-                            <span class="badge bg-success">Hoạt động</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">Đã khóa</span>
-                        }
-                    </td>
-                    <td class="text-center">
-                        <a asp-action="Edit" asp-route-id="@item.MaTaiKhoan" class="btn btn-sm btn-warning">Sửa</a>
-                        <a asp-action="Details" asp-route-id="@item.MaTaiKhoan" class="btn btn-sm btn-info">Chi tiết</a>
-                        <form asp-action="ToggleStatus" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline"
-                              onsubmit="return confirm('Bạn có chắc muốn thay đổi trạng thái tài khoản này?');">
-                            @Html.AntiForgeryToken()
-                            @if (item.TrangThai == 1)
+                            @foreach (var item in Model)
                             {
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Khóa</button>
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="px-5 py-4 whitespace-nowrap">
+                                        <span class="font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">@item.MaTaiKhoan</span>
+                                    </td>
+                                    <td class="px-5 py-4 whitespace-nowrap font-semibold text-slate-900 text-sm">@item.TenDangNhap</td>
+                                    <td class="px-5 py-4 whitespace-nowrap text-slate-700 text-sm">@item.HoTen</td>
+                                    <td class="px-5 py-4 whitespace-nowrap text-slate-500 text-sm">@item.Email</td>
+                                    <td class="px-5 py-4 whitespace-nowrap">
+                                        @if (item.VaiTro == AppRoles.Admin)
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">
+                                                <i class="fa-solid fa-user-shield text-[10px]"></i> Admin
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-800">
+                                                <i class="fa-solid fa-user text-[10px]"></i> Bệnh nhân
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="px-5 py-4 whitespace-nowrap">
+                                        @if (item.TrangThai == 1)
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Hoạt động
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Đã khóa
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="px-5 py-4 whitespace-nowrap text-center">
+                                        <div class="inline-flex items-center gap-1.5">
+                                            <a asp-action="Edit" asp-route-id="@item.MaTaiKhoan"
+                                               class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-200 transition">
+                                                <i class="fa-regular fa-pen-to-square mr-1"></i> Sửa
+                                            </a>
+                                            <a asp-action="Details" asp-route-id="@item.MaTaiKhoan"
+                                               class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-semibold border border-sky-200 transition">
+                                                <i class="fa-regular fa-eye mr-1"></i> Chi tiết
+                                            </a>
+                                            <form asp-action="ToggleStatus" asp-route-id="@item.MaTaiKhoan" method="post" class="inline"
+                                                  onsubmit="return confirm('Bạn có chắc muốn thay đổi trạng thái tài khoản này?');">
+                                                @Html.AntiForgeryToken()
+                                                @if (item.TrangThai == 1)
+                                                {
+                                                    <button type="submit"
+                                                            class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold border border-red-200 transition">
+                                                        <i class="fa-solid fa-lock mr-1"></i> Khóa
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit"
+                                                            class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold border border-emerald-200 transition">
+                                                        <i class="fa-solid fa-lock-open mr-1"></i> Mở khóa
+                                                    </button>
+                                                }
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
                             }
-                            else
-                            {
-                                <button type="submit" class="btn btn-sm btn-outline-success">Mở khóa</button>
-                            }
-                        </form>
-                    </td>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-@if (totalPages > 0)
-{
-    <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-3">
-        <span class="text-muted">Trang <strong>@pageIndex</strong> / <strong>@totalPages</strong> (Tổng: @ViewData["TotalRecords"] bản ghi)</span>
-        <ul class="pagination mb-0">
-            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
-                <a class="page-link"
-                   asp-action="Index"
-                   asp-route-sortOrder="@currentSort"
-                   asp-route-pageNumber="@(pageIndex - 1)"
-                   asp-route-searchString="@currentFilter"
-                   asp-route-vaiTroFilter="@vaiTroFilter"
-                   asp-route-trangThaiFilter="@trangThaiFilter">Trước</a>
-            </li>
-            @for (int i = 1; i <= totalPages; i++)
+            <!-- Pagination -->
+            @if (totalPages > 0)
             {
-                <li class="page-item @(i == pageIndex ? "active" : "")">
-                    <a class="page-link"
-                       asp-action="Index"
-                       asp-route-sortOrder="@currentSort"
-                       asp-route-pageNumber="@i"
-                       asp-route-searchString="@currentFilter"
-                       asp-route-vaiTroFilter="@vaiTroFilter"
-                       asp-route-trangThaiFilter="@trangThaiFilter">@i</a>
-                </li>
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span class="text-sm text-slate-600">
+                        Trang <strong class="text-slate-900">@pageIndex</strong> / <strong class="text-slate-900">@totalPages</strong>
+                        <span class="text-slate-400 mx-1">•</span> Tổng <strong class="text-slate-900">@ViewData["TotalRecords"]</strong> bản ghi
+                    </span>
+                    <div class="inline-flex items-center gap-1">
+                        <a class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition @(pageIndex <= 1 ? "pointer-events-none opacity-50" : "")"
+                           asp-action="Index"
+                           asp-route-sortOrder="@currentSort"
+                           asp-route-pageNumber="@(pageIndex - 1)"
+                           asp-route-searchString="@currentFilter"
+                           asp-route-vaiTroFilter="@vaiTroFilter"
+                           asp-route-trangThaiFilter="@trangThaiFilter">
+                            <i class="fa-solid fa-chevron-left text-xs mr-1"></i> Trước
+                        </a>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <a class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition @(i == pageIndex ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100")"
+                               asp-action="Index"
+                               asp-route-sortOrder="@currentSort"
+                               asp-route-pageNumber="@i"
+                               asp-route-searchString="@currentFilter"
+                               asp-route-vaiTroFilter="@vaiTroFilter"
+                               asp-route-trangThaiFilter="@trangThaiFilter">@i</a>
+                        }
+                        <a class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition @(pageIndex >= totalPages ? "pointer-events-none opacity-50" : "")"
+                           asp-action="Index"
+                           asp-route-sortOrder="@currentSort"
+                           asp-route-pageNumber="@(pageIndex + 1)"
+                           asp-route-searchString="@currentFilter"
+                           asp-route-vaiTroFilter="@vaiTroFilter"
+                           asp-route-trangThaiFilter="@trangThaiFilter">
+                            Tiếp <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+                        </a>
+                    </div>
+                </div>
             }
-            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
-                <a class="page-link"
-                   asp-action="Index"
-                   asp-route-sortOrder="@currentSort"
-                   asp-route-pageNumber="@(pageIndex + 1)"
-                   asp-route-searchString="@currentFilter"
-                   asp-route-vaiTroFilter="@vaiTroFilter"
-                   asp-route-trangThaiFilter="@trangThaiFilter">Tiếp</a>
-            </li>
-        </ul>
-    </nav>
-}
+        </div>
+    </div>
+</div>

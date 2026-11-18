@@ -29,3 +29,8 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* Fix conflict between Tailwind CSS (.collapse { visibility: collapse }) and Bootstrap navbar */
+.navbar-collapse.collapse {
+  visibility: visible !important;
+}

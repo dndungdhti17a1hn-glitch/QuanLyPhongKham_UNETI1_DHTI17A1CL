@@ -84,6 +84,24 @@ namespace QuanLyPhongKham.Data
                 }, "123456"),
                 (new TaiKhoan
                 {
+                    MaTaiKhoan = "TK_BN_M3_2",
+                    TenDangNhap = "benhnhan2",
+                    HoTen = "Lê Thị Bình",
+                    Email = "benhnhan2@gmail.com",
+                    VaiTro = AppRoles.Patient,
+                    TrangThai = 1
+                }, "123456"),
+                (new TaiKhoan
+                {
+                    MaTaiKhoan = "TK_BN_M3_3",
+                    TenDangNhap = "benhnhan3",
+                    HoTen = "Phạm Minh Châu",
+                    Email = "benhnhan3@gmail.com",
+                    VaiTro = AppRoles.Patient,
+                    TrangThai = 1
+                }, "123456"),
+                (new TaiKhoan
+                {
                     MaTaiKhoan = "TK_KHOA",
                     TenDangNhap = "tkbikhoa",
                     HoTen = "Hoàng Văn Khóa (Tài khoản bị khóa)",

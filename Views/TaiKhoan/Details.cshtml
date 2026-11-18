@@ -4,40 +4,88 @@
     ViewData["Title"] = "Chi tiết tài khoản";
 }
 
-<h2>Chi tiết tài khoản</h2>
-<hr />
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div>
-    <dl class="row">
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.MaTaiKhoan)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.MaTaiKhoan)</dd>
+<div class="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8" style="font-family: 'Inter', sans-serif;">
+    <div class="max-w-2xl mx-auto space-y-6">
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TenDangNhap)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.TenDangNhap)</dd>
+        <div>
+            <a asp-action="Index" class="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-teal-600 transition">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại danh sách tài khoản
+            </a>
+        </div>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.HoTen)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.HoTen)</dd>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-sky-50/70 to-white flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
+                        <i class="fa-solid fa-id-card text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold text-slate-900">Chi tiết tài khoản</h1>
+                        <p class="text-xs text-slate-500 mt-0.5">Thông tin hồ sơ tài khoản trong hệ thống</p>
+                    </div>
+                </div>
+                @if (Model.TrangThai == 1)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Hoạt động
+                    </span>
+                }
+                else
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Đã khóa
+                    </span>
+                }
+            </div>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+            <div class="p-6 divide-y divide-slate-100">
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.MaTaiKhoan)</span>
+                    <span class="sm:col-span-2 font-mono text-sm font-semibold text-slate-900">@Html.DisplayFor(model => model.MaTaiKhoan)</span>
+                </div>
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.TenDangNhap)</span>
+                    <span class="sm:col-span-2 text-sm font-semibold text-slate-900">@Html.DisplayFor(model => model.TenDangNhap)</span>
+                </div>
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.HoTen)</span>
+                    <span class="sm:col-span-2 text-sm text-slate-800">@Html.DisplayFor(model => model.HoTen)</span>
+                </div>
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.Email)</span>
+                    <span class="sm:col-span-2 text-sm text-slate-800">@Html.DisplayFor(model => model.Email)</span>
+                </div>
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.VaiTro)</span>
+                    <div class="sm:col-span-2">
+                        @if (Model.VaiTro == AppRoles.Admin)
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">
+                                <i class="fa-solid fa-user-shield text-[10px]"></i> Admin
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-800">
+                                <i class="fa-solid fa-user text-[10px]"></i> Bệnh nhân
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.VaiTro)</dt>
-        <dd class="col-sm-9">@(Model.VaiTro == AppRoles.Admin ? "Admin" : "Bệnh nhân")</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TrangThai)</dt>
-        <dd class="col-sm-9">
-            @if (Model.TrangThai == 1)
-            {
-                <span class="badge bg-success">Hoạt động</span>
-            }
-            else
-            {
-                <span class="badge bg-danger">Đã khóa</span>
-            }
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.MaTaiKhoan" class="btn btn-warning">Sửa</a>
-    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+                <a asp-action="Index" class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition">
+                    Quay lại danh sách
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.MaTaiKhoan" class="inline-flex items-center px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm shadow-sm transition">
+                    <i class="fa-regular fa-pen-to-square mr-2"></i> Sửa tài khoản
+                </a>
+            </div>
+        </div>
+    </div>
 </div>

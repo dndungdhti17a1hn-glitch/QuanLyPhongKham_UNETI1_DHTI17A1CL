@@ -7,78 +7,141 @@
     string? currentFilter = ViewData["CurrentFilter"] as string;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Bảng giá Dịch vụ Khám chữa bệnh</h2>
-    <a asp-controller="BenhNhan" asp-action="DatLich" class="btn btn-success">📅 Đặt lịch khám ngay</a>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8" style="font-family: 'Inter', sans-serif;">
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- Header Card -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <span class="inline-block px-3 py-1 bg-teal-100 text-teal-800 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">
+                    Phòng Khám Đa Khoa UN1
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                    <i class="fa-solid fa-file-invoice-dollar text-teal-600"></i> Bảng giá Dịch vụ Khám chữa bệnh
+                </h1>
+                <p class="text-slate-500 text-sm mt-1">Bảng giá niêm yết công khai, minh bạch các dịch vụ khám bệnh, xét nghiệm và chẩn đoán hình ảnh.</p>
+            </div>
+            <div>
+                <a asp-controller="BenhNhan" asp-action="DatLich"
+                   class="inline-flex items-center px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-lg shadow-teal-500/25 transition">
+                    <i class="fa-regular fa-calendar-plus mr-2"></i> Đặt lịch khám ngay
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <form asp-action="TraCuu" method="get" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <input type="hidden" name="sortOrder" value="@currentSort" />
+                <div class="md:col-span-9 relative">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-sm"></i>
+                    <input type="text" name="searchString" value="@currentFilter"
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm text-slate-800 transition"
+                           placeholder="Tìm kiếm tên dịch vụ khám, xét nghiệm, siêu âm..." />
+                </div>
+                <div class="md:col-span-3 flex gap-2">
+                    <button type="submit"
+                            class="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm transition">
+                        <i class="fa-solid fa-magnifying-glass mr-1.5"></i> Tìm kiếm
+                    </button>
+                    <a asp-action="TraCuu"
+                       class="inline-flex items-center justify-center px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-sm transition"
+                       title="Xóa bộ lọc">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mã DV</th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <a asp-action="TraCuu" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@currentFilter"
+                                   class="inline-flex items-center gap-1.5 hover:text-teal-600 transition">
+                                    Tên dịch vụ khám <i class="fa-solid fa-sort text-slate-400"></i>
+                                </a>
+                            </th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <a asp-action="TraCuu" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-searchString="@currentFilter"
+                                   class="inline-flex items-center gap-1.5 hover:text-teal-600 transition">
+                                    Đơn giá niêm yết <i class="fa-solid fa-sort text-slate-400"></i>
+                                </a>
+                            </th>
+                            <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mô tả chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center">
+                                    <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                                        <i class="fa-regular fa-folder-open text-2xl"></i>
+                                    </div>
+                                    <p class="text-slate-500 font-medium text-sm">Không tìm thấy dịch vụ khám nào phù hợp.</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="px-5 py-4 whitespace-nowrap">
+                                        <span class="font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 border border-teal-100">@item.MaDichVu</span>
+                                    </td>
+                                    <td class="px-5 py-4 whitespace-nowrap font-semibold text-slate-900 text-sm">@item.TenDichVu</td>
+                                    <td class="px-5 py-4 whitespace-nowrap font-extrabold text-teal-700 text-sm">@item.GiaTien.ToString("N0") VNĐ</td>
+                                    <td class="px-5 py-4 text-slate-600 text-sm">@(string.IsNullOrEmpty(item.MoTa) ? "—" : item.MoTa)</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (totalPages > 0)
+            {
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span class="text-sm text-slate-600">
+                        Trang <strong class="text-slate-900">@pageIndex</strong> / <strong class="text-slate-900">@totalPages</strong>
+                    </span>
+                    <div class="inline-flex items-center gap-1">
+                        <a class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition @(pageIndex <= 1 ? "pointer-events-none opacity-50" : "")"
+                           asp-action="TraCuu"
+                           asp-route-sortOrder="@currentSort"
+                           asp-route-pageNumber="@(pageIndex - 1)"
+                           asp-route-searchString="@currentFilter">
+                            <i class="fa-solid fa-chevron-left text-xs mr-1"></i> Trước
+                        </a>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <a class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition @(i == pageIndex ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100")"
+                               asp-action="TraCuu"
+                               asp-route-sortOrder="@currentSort"
+                               asp-route-pageNumber="@i"
+                               asp-route-searchString="@currentFilter">@i</a>
+                        }
+                        <a class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition @(pageIndex >= totalPages ? "pointer-events-none opacity-50" : "")"
+                           asp-action="TraCuu"
+                           asp-route-sortOrder="@currentSort"
+                           asp-route-pageNumber="@(pageIndex + 1)"
+                           asp-route-searchString="@currentFilter">
+                            Tiếp <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 </div>
-
-<form asp-action="TraCuu" method="get" class="row g-2 mb-3">
-    <input type="hidden" name="sortOrder" value="@currentSort" />
-    <div class="col-md-9">
-        <input type="text" name="searchString" value="@currentFilter" class="form-control" placeholder="Tìm kiếm tên dịch vụ khám, xét nghiệm, siêu âm..." />
-    </div>
-    <div class="col-md-3 d-flex gap-2">
-        <button class="btn btn-primary w-100" type="submit">Tìm kiếm</button>
-        <a asp-action="TraCuu" class="btn btn-outline-secondary">Xóa</a>
-    </div>
-</form>
-
-<table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>Mã DV</th>
-            <th>
-                <a asp-action="TraCuu" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@currentFilter">
-                    Tên dịch vụ khám
-                </a>
-            </th>
-            <th>
-                <a asp-action="TraCuu" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-searchString="@currentFilter">
-                    Đơn giá niêm yết
-                </a>
-            </th>
-            <th>Mô tả chi tiết</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (!Model.Any())
-        {
-            <tr>
-                <td colspan="4" class="text-center text-muted py-4">Không tìm thấy dịch vụ khám nào phù hợp.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td><span class="badge bg-secondary">@item.MaDichVu</span></td>
-                    <td class="fw-semibold">@item.TenDichVu</td>
-                    <td class="text-danger fw-bold">@item.GiaTien.ToString("N0") VNĐ</td>
-                    <td>@item.MoTa</td>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
-
-@if (totalPages > 0)
-{
-    <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-3">
-        <span class="text-muted">Trang <strong>@pageIndex</strong> / <strong>@totalPages</strong></span>
-        <ul class="pagination mb-0">
-            <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
-                <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@(pageIndex - 1)" asp-route-searchString="@currentFilter">Trước</a>
-            </li>
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == pageIndex ? "active" : "")">
-                    <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@i" asp-route-searchString="@currentFilter">@i</a>
-                </li>
-            }
-            <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
-                <a class="page-link" asp-action="TraCuu" asp-route-sortOrder="@currentSort" asp-route-pageNumber="@(pageIndex + 1)" asp-route-searchString="@currentFilter">Tiếp</a>
-            </li>
-        </ul>
-    </nav>
-}

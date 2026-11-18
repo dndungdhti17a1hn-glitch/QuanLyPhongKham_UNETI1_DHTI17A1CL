@@ -194,7 +194,7 @@ namespace QuanLyPhongKham.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Quy định mục 8.4 & 12: Không hủy lịch đã hoàn tất
+            // Quy định mục 8.4 & 12 (BR-M4-06): Chỉ được hủy lịch khi trạng thái là 'Chờ xác nhận' hoặc 'Đã xác nhận'
             if (lichHen.TrangThai == "Hoàn tất")
             {
                 TempData["ErrorMessage"] = "Không thể hủy lịch khám đã hoàn tất!";
@@ -204,6 +204,12 @@ namespace QuanLyPhongKham.Controllers
             if (lichHen.TrangThai == "Đã hủy")
             {
                 TempData["ErrorMessage"] = "Lịch hẹn này đã bị hủy từ trước.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (lichHen.TrangThai != "Chờ xác nhận" && lichHen.TrangThai != "Đã xác nhận")
+            {
+                TempData["ErrorMessage"] = $"Chỉ có thể hủy lịch hẹn ở trạng thái 'Chờ xác nhận' hoặc 'Đã xác nhận' (trạng thái hiện tại: {lichHen.TrangThai}).";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -393,11 +399,8 @@ namespace QuanLyPhongKham.Controllers
                 return RedirectToAction(nameof(HoaDon), new { maThanhToan = phieuKham.ThanhToan.MaThanhToan });
             }
 
+            // BR-M4-04: Tổng tiền = Sum(SoLuong * DonGia) từ danh sách dịch vụ thực tế
             var tongTien = phieuKham.ChiTietDichVus.Sum(c => c.ThanhTien);
-            if (tongTien <= 0)
-            {
-                tongTien = 150000m;
-            }
 
             var viewModel = new ThanhToanViewModel
             {
@@ -437,8 +440,8 @@ namespace QuanLyPhongKham.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // BR-M4-04: Tổng tiền = Sum(SoLuong * DonGia) từ danh sách dịch vụ thực tế
             var tongTienThucTe = phieuKham.ChiTietDichVus.Sum(c => c.ThanhTien);
-            if (tongTienThucTe <= 0) tongTienThucTe = 150000m;
 
             var maThanhToan = "TT_" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
             var thanhToan = new ThanhToan

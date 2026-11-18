@@ -4,44 +4,71 @@
     ViewData["Title"] = "Chi tiết dịch vụ khám";
 }
 
-<h2>Chi tiết dịch vụ khám</h2>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.MaDichVu)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.MaDichVu)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TenDichVu)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TenDichVu)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.GiaTien)
-        </dt>
-        <dd class="col-sm-10">
-            @Model.GiaTien.ToString("N0") VNĐ
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.MoTa)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.MoTa)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class="col-sm-10">
-            @(Model.TrangThai == 1 ? "Hoạt động" : "Ngừng cung cấp")
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.MaDichVu" class="btn btn-warning">Sửa</a> |
-    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+<div class="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8" style="font-family: 'Inter', sans-serif;">
+    <div class="max-w-2xl mx-auto space-y-6">
+
+        <div>
+            <a asp-action="Index" class="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-teal-600 transition">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại danh sách dịch vụ khám
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-sky-50/70 to-white flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
+                        <i class="fa-solid fa-notes-medical text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold text-slate-900">Chi tiết dịch vụ khám</h1>
+                        <p class="text-xs text-slate-500 mt-0.5">Thông tin dịch vụ và đơn giá niêm yết</p>
+                    </div>
+                </div>
+                @if (Model.TrangThai == 1)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Hoạt động
+                    </span>
+                }
+                else
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Ngừng cung cấp
+                    </span>
+                }
+            </div>
+
+            <div class="p-6 divide-y divide-slate-100">
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.MaDichVu)</span>
+                    <span class="sm:col-span-2 font-mono text-sm font-semibold text-teal-700">@Html.DisplayFor(model => model.MaDichVu)</span>
+                </div>
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.TenDichVu)</span>
+                    <span class="sm:col-span-2 text-sm font-bold text-slate-900">@Html.DisplayFor(model => model.TenDichVu)</span>
+                </div>
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.GiaTien)</span>
+                    <span class="sm:col-span-2 text-base font-extrabold text-teal-700">@Model.GiaTien.ToString("N0") VNĐ</span>
+                </div>
+                <div class="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <span class="text-sm font-semibold text-slate-500">@Html.DisplayNameFor(model => model.MoTa)</span>
+                    <span class="sm:col-span-2 text-sm text-slate-700 leading-relaxed">@(string.IsNullOrEmpty(Model.MoTa) ? "Chưa có mô tả chi tiết." : Model.MoTa)</span>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+                <a asp-action="Index" class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition">
+                    Quay lại
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.MaDichVu" class="inline-flex items-center px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm shadow-sm transition">
+                    <i class="fa-regular fa-pen-to-square mr-2"></i> Sửa dịch vụ
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
